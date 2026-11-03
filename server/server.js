@@ -36,6 +36,7 @@ app.post("/api/chat", async (req, res) => {
     if (!apiKey) return res.status(503).json({ error: "RR AI is waiting for its secure API configuration." });
 
     const message = typeof req.body?.message === "string" ? req.body.message.trim() : "";
+    const priorMessages = Array.isArray(req.body?.messages) ? req.body.messages.slice(-12).filter(item => item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string" && item.content.trim().length > 0 && item.content.length <= 4000) : [];
     if (!message || message.length > 4000) {
       return res.status(400).json({ error: "Please enter a message under 4,000 characters." });
     }
@@ -58,6 +59,7 @@ app.post("/api/chat", async (req, res) => {
                 role: "system",
                 content: "You are RR AI, the helpful assistant for RR GLOBAL. Be clear, respectful, age-appropriate, and honest. Do not claim capabilities you do not have. If a request is unsafe or unsuitable for a young person, respond with safe, age-appropriate guidance."
               },
+              ...priorMessages,
               { role: "user", content: message }
             ],
             max_completion_tokens: 700
