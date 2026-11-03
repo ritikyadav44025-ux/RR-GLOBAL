@@ -15,21 +15,59 @@ main{padding:34px 0 24px}.intro{text-align:center;margin:0 auto 22px}.intro h1{m
 <body>
 <header><div class="wrap nav"><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
 <main class="wrap">
-<div class="intro"><span class="status">Interactive UI prototype</span><h1>RR AI Chat</h1><p>A first look at the conversation experience.</p></div>
-<div class="notice"><strong>Prototype mode:</strong> This page uses sample on-device responses only. It is not connected to a live AI model, and messages are not sent to an AI service.</div>
+<div class="intro"><span class="status">Interactive UI prototype</span><h1>RR AI Chat</h1><p>A secure chat interface prepared for the RR AI Gemini connection.</p></div>
+<div class="notice" id="serviceNotice"><strong>Setup in progress:</strong> RR AI is ready for a secure Gemini connection. The server must be deployed and configured before live answers are available.</div>
 <section class="chat" aria-label="RR AI chat prototype">
-<div class="chathead"><div class="orb">AI</div><div><strong>RR AI Assistant</strong><small>Prototype conversation</small></div></div>
+<div class="chathead"><div class="orb">AI</div><div><strong>RR AI Assistant</strong><small>Gemini connection pending</small></div></div>
 <div class="messages" id="messages" aria-live="polite"><div class="msg assistant">Hello! Welcome to the RR AI prototype. Try a sample prompt below. This demo uses prepared responses while we build the real AI connection.</div></div>
 <div class="suggestions"><button type="button" data-prompt="What is RR GLOBAL?">What is RR GLOBAL?</button><button type="button" data-prompt="Give me a study tip.">Study tip</button><button type="button" data-prompt="Help me plan a creative project.">Plan a project</button></div>
 <form class="composer" id="chatForm"><textarea id="prompt" rows="1" placeholder="Type a message…" aria-label="Type a message"></textarea><button type="submit">Send</button></form>
 </section>
-<div class="hint">Next development milestone: connect a secure server-side AI API.</div>
+<div class="hint">Chat UI ready · Secure server deployment is the remaining connection step.</div>
 </main>
 <script>
-const form=document.getElementById('chatForm'),input=document.getElementById('prompt'),messages=document.getElementById('messages');
-function addMessage(text,kind){const el=document.createElement('div');el.className='msg '+kind;el.textContent=text;messages.appendChild(el);messages.scrollTop=messages.scrollHeight;}
-function demoReply(text){const q=text.toLowerCase();if(q.includes('rr global'))return 'RR GLOBAL is a growing technology brand exploring useful AI products and digital experiences. Its guiding line is: THE FUTURE STARTS HERE.';if(q.includes('study'))return 'Try this: choose one small topic, study it for 20 minutes, then explain the main idea in your own words. Take a short break before the next topic.';if(q.includes('project')||q.includes('creative'))return 'A simple project plan: 1) Write the goal in one sentence. 2) List three small tasks. 3) Make a rough first version. 4) Review it and improve one thing at a time.';return 'Thanks for trying the RR AI prototype! This demo is not connected to a live AI model yet. The next milestone is a secure AI connection so RR AI can answer a wider range of questions.';}
-function send(text){const value=text.trim();if(!value)return;addMessage(value,'user');input.value='';window.setTimeout(()=>addMessage(demoReply(value),'assistant'),250);}
+const API_BASE_URL = ""; // Add the deployed backend URL here after hosting. Never put the Gemini API key in this file.
+const form=document.getElementById('chatForm');
+const input=document.getElementById('prompt');
+const messages=document.getElementById('messages');
+const sendButton=form.querySelector('button[type="submit"]');
+const notice=document.getElementById('serviceNotice');
+
+function addMessage(text,kind){
+  const el=document.createElement('div');
+  el.className='msg '+kind;
+  el.textContent=text;
+  messages.appendChild(el);
+  messages.scrollTop=messages.scrollHeight;
+}
+async function send(text){
+  const value=text.trim();
+  if(!value || sendButton.disabled)return;
+  addMessage(value,'user');
+  input.value='';
+  sendButton.disabled=true;
+  sendButton.textContent='…';
+  try{
+    if(!API_BASE_URL){
+      addMessage('The chat interface is ready, but the secure RR AI server has not been deployed yet. Once hosting is configured, this chat will connect to Gemini.','assistant');
+      return;
+    }
+    const response=await fetch(API_BASE_URL.replace(/\\/$/,'')+'/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:value})
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(data.error || 'The AI service is temporarily unavailable.');
+    addMessage(data.answer || 'The AI returned an empty response. Please try again.','assistant');
+  }catch(error){
+    addMessage(error.message || 'Could not reach RR AI. Please try again later.','assistant');
+  }finally{
+    sendButton.disabled=false;
+    sendButton.textContent='Send';
+    input.focus();
+  }
+}
 form.addEventListener('submit',e=>{e.preventDefault();send(input.value);});
 document.querySelectorAll('[data-prompt]').forEach(btn=>btn.addEventListener('click',()=>send(btn.dataset.prompt)));
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(input.value);}});
