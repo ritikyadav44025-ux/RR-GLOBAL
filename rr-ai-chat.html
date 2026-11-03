@@ -36,6 +36,8 @@ const voiceHint=document.getElementById('voiceHint');
 const voiceModeButton=document.getElementById('voiceModeButton');
 const newChatButton=document.getElementById('newChatButton');
 let voiceRepliesEnabled=false;
+let voiceCallActive=false;
+let voiceCallSpeaking=false;
 function updateActionButton(){const hasText=!!input.value.trim();voiceModeButton.classList.toggle('send-mode',hasText);voiceModeButton.title=hasText?'Send message':'Voice replies';voiceModeButton.setAttribute('aria-label',hasText?'Send message':'Toggle voice replies');}
 
 function addMessage(text,kind){
@@ -66,7 +68,7 @@ async function send(text){
     if(!response.ok)throw new Error(data.error || 'The AI service is temporarily unavailable.');
     const answer=data.answer || 'The AI returned an empty response. Please try again.';
     addMessage(answer,'assistant');
-    if(voiceRepliesEnabled && 'speechSynthesis' in window){window.speechSynthesis.cancel();const spoken=new SpeechSynthesisUtterance(answer);spoken.lang='hi-IN';window.speechSynthesis.speak(spoken);}
+    if((voiceRepliesEnabled||voiceCallActive) && 'speechSynthesis' in window){window.speechSynthesis.cancel();const spoken=new SpeechSynthesisUtterance(answer);spoken.lang=/[\\u0900-\\u097F]/.test(answer)?'hi-IN':'en-IN';if(voiceCallActive){voiceCallSpeaking=true;spoken.onend=()=>{voiceCallSpeaking=false;if(voiceCallActive)startVoiceCallListening();};spoken.onerror=()=>{voiceCallSpeaking=false;if(voiceCallActive)startVoiceCallListening();};}window.speechSynthesis.speak(spoken);}
   }catch(error){
     addMessage(error.message || 'Could not reach RR AI. Please try again later.','assistant');
   }finally{
@@ -80,6 +82,9 @@ async function send(text){
  const SpeechRecognition=window.SpeechRecognition || window.webkitSpeechRecognition;
  let recognition=null;
  let isListening=false;
+ let voiceCallTranscript='';
+ function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallSpeaking)return;try{recognition.lang='hi-IN';recognition.continuous=true;recognition.interimResults=true;recognition.start();}catch(_){}}
+ function stopVoiceCall(){voiceCallActive=false;voiceCallSpeaking=false;if(recognition&&isListening)recognition.stop();if('speechSynthesis' in window)window.speechSynthesis.cancel();voiceModeButton.classList.remove('active');voiceModeButton.setAttribute('aria-pressed','false');voiceModeButton.querySelector('.rr-mark').textContent='RR';voiceHint.textContent='Voice call ended.';}
  if(!SpeechRecognition){
    micButton.addEventListener('click',()=>{voiceHint.textContent='Voice input is not supported in this browser. Try the latest Chrome browser.';});
  }else{
@@ -114,7 +119,7 @@ async function send(text){
  }
 
 newChatButton.addEventListener('click',()=>{if('speechSynthesis' in window)window.speechSynthesis.cancel();messages.innerHTML='<div class="msg assistant">Hello! Welcome to RR AI. I am connected to the secure Groq backend. Ask me a question to get started.</div>';input.value='';updateActionButton();voiceHint.textContent='New chat started.';});
-voiceModeButton.addEventListener('click',e=>{if(input.value.trim())return;e.preventDefault();voiceRepliesEnabled=!voiceRepliesEnabled;voiceModeButton.classList.toggle('active',voiceRepliesEnabled);voiceModeButton.setAttribute('aria-pressed',String(voiceRepliesEnabled));voiceHint.textContent=voiceRepliesEnabled?'Voice replies are on. RR AI will read its answers aloud.':'Voice replies are off.';if(!voiceRepliesEnabled && 'speechSynthesis' in window)window.speechSynthesis.cancel();});
+voiceModeButton.addEventListener('click',e=>{if(input.value.trim())return;e.preventDefault();if(voiceCallActive){stopVoiceCall();return;}if(!recognition){voiceHint.textContent='Live voice call is not supported in this browser. Try Chrome.';return;}voiceRepliesEnabled=false;voiceCallActive=true;voiceModeButton.classList.add('active');voiceModeButton.setAttribute('aria-pressed','true');voiceModeButton.querySelector('.rr-mark').textContent='■';voiceHint.textContent='RR AI voice call is on. बोलना शुरू करें; बंद करने के लिए RR बटन दबाएँ।';startVoiceCallListening();});
 form.addEventListener('submit',e=>{e.preventDefault();if(input.value.trim())send(input.value);else{voiceRepliesEnabled=!voiceRepliesEnabled;voiceModeButton.classList.toggle('active',voiceRepliesEnabled);voiceModeButton.setAttribute('aria-pressed',String(voiceRepliesEnabled));voiceHint.textContent=voiceRepliesEnabled?'Voice replies are on. RR AI will read its answers aloud.':'Voice replies are off.';}});
 input.addEventListener('input',updateActionButton);
 document.querySelectorAll('[data-prompt]').forEach(btn=>btn.addEventListener('click',()=>send(btn.dataset.prompt)));
