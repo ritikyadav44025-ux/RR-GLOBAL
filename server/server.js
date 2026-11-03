@@ -32,66 +32,67 @@ app.get("/health", (_req, res) => res.json({ ok: true, service: "RR AI API" }));
 
 app.post("/api/chat", async (req, res) => {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return res.status(503).json({ error: "AI service is not configured yet." });
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) return res.status(503).json({ error: "RR AI is waiting for its secure API configuration." });
 
     const message = typeof req.body?.message === "string" ? req.body.message.trim() : "";
     if (!message || message.length > 4000) {
       return res.status(400).json({ error: "Please enter a message under 4,000 characters." });
     }
 
-    // Retry temporary Gemini HTTP errors and network failures.
+    // Retry temporary Groq HTTP errors and network failures.
     let response;
     let lastNetworkError;
     for (let attempt = 0; attempt < 3; attempt += 1) {
       try {
-        response = await fetch(
-          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": apiKey
-            },
-            body: JSON.stringify({
-              systemInstruction: {
-                parts: [{ text: "You are RR AI, the helpful assistant for RR GLOBAL. Be clear, respectful, age-appropriate, and honest. Do not claim capabilities you do not have." }]
+        response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: "openai/gpt-oss-20b",
+            messages: [
+              {
+                role: "system",
+                content: "You are RR AI, the helpful assistant for RR GLOBAL. Be clear, respectful, age-appropriate, and honest. Do not claim capabilities you do not have. If a request is unsafe or unsuitable for a young person, respond with safe, age-appropriate guidance."
               },
-              contents: [{ role: "user", parts: [{ text: message }] }],
-              generationConfig: { temperature: 0.7, maxOutputTokens: 700 }
-            }),
-            signal: AbortSignal.timeout(25000)
-          }
-        );
+              { role: "user", content: message }
+            ],
+            max_completion_tokens: 700
+          }),
+          signal: AbortSignal.timeout(25000)
+        });
         lastNetworkError = undefined;
         if (![500, 502, 503, 504].includes(response.status) || attempt === 2) break;
       } catch (error) {
         lastNetworkError = error;
-        console.error("Gemini connection attempt failed:", error?.cause?.code || error?.name || "unknown");
+        console.error("Groq connection attempt failed:", error?.cause?.code || error?.name || "unknown");
         if (attempt === 2) {
-          return res.status(502).json({ error: "Gemini could not be reached. Please try again shortly." });
+          return res.status(502).json({ error: "RR AI could not reach its AI service. Please try again shortly." });
         }
       }
       await new Promise(resolve => setTimeout(resolve, 1200 * (attempt + 1)));
     }
 
     if (lastNetworkError && !response) {
-      return res.status(502).json({ error: "Gemini could not be reached. Please try again shortly." });
+      return res.status(502).json({ error: "RR AI could not reach its AI service. Please try again shortly." });
     }
 
     const data = await response.json();
     if (!response.ok) {
-      console.error("Gemini API error:", response.status, data?.error?.status || "unknown");
-      return res.status(response.status === 429 ? 429 : 502).json({
-        error: response.status === 429 ? "Free usage limit reached. Please try again later." : "The AI service could not answer right now."
-      });
+      console.error("Groq API error:", response.status, data?.error?.type || data?.error?.code || "unknown");
+      if (response.status === 429) {
+        return res.status(429).json({ error: "RR AI is temporarily at its free usage limit. Please try again later." });
+      }
+      if (response.status === 401 || response.status === 403) {
+        return res.status(503).json({ error: "RR AI's secure API configuration needs attention." });
+      }
+      return res.status(502).json({ error: "The AI service could not answer right now. Please try again shortly." });
     }
 
-    const answer = data?.candidates?.[0]?.content?.parts
-      ?.map(part => part.text || "")
-      .join("")
-      .trim();
-
+    const answer = data?.choices?.[0]?.message?.content?.trim();
     if (!answer) return res.status(502).json({ error: "The AI returned an empty response. Please try again." });
     return res.json({ answer });
   } catch (error) {
