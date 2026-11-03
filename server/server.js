@@ -40,23 +40,31 @@ app.post("/api/chat", async (req, res) => {
       return res.status(400).json({ error: "Please enter a message under 4,000 characters." });
     }
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey
-        },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: "You are RR AI, the helpful assistant for RR GLOBAL. Be clear, respectful, age-appropriate, and honest. Do not claim capabilities you do not have." }]
+    // Retry temporary Gemini overload/network gateway responses twice.
+    let response;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      response = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
           },
-          contents: [{ role: "user", parts: [{ text: message }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 700 }
-        })
-      }
-    );
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: "You are RR AI, the helpful assistant for RR GLOBAL. Be clear, respectful, age-appropriate, and honest. Do not claim capabilities you do not have." }]
+            },
+            contents: [{ role: "user", parts: [{ text: message }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 700 }
+          }),
+          signal: AbortSignal.timeout(25000)
+        }
+      );
+
+      if (![500, 502, 503, 504].includes(response.status) || attempt === 2) break;
+      await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+    }
 
     const data = await response.json();
     if (!response.ok) {
