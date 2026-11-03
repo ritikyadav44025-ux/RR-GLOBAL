@@ -15,18 +15,18 @@ main{padding:34px 0 24px}.intro{text-align:center;margin:0 auto 22px}.intro h1{m
 <body>
 <header><div class="wrap nav"><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
 <main class="wrap">
-<div class="intro"><span class="status">Secure Gemini backend connected</span><h1>RR AI Chat</h1><p>Chat with RR AI, powered by the secure Gemini backend.</p></div>
-<div class="notice" id="serviceNotice"><strong>Backend connected:</strong> RR AI is ready to send messages securely to the Gemini service.</div>
+<div class="intro"><span class="status">Secure Groq backend connected</span><h1>RR AI Chat</h1><p>Chat with RR AI, powered by the secure Groq backend.</p></div>
+<div class="notice" id="serviceNotice"><strong>Backend connected:</strong> RR AI is ready to send messages securely to the Groq service.</div>
 <section class="chat" aria-label="RR AI chat prototype">
-<div class="chathead"><div class="orb">AI</div><div><strong>RR AI Assistant</strong><small>Gemini backend · Online</small></div></div>
-<div class="messages" id="messages" aria-live="polite"><div class="msg assistant">Hello! Welcome to RR AI. I am connected to the secure Gemini backend. Ask me a question to get started.</div></div>
+<div class="chathead"><div class="orb">AI</div><div><strong>RR AI Assistant</strong><small>Groq backend · Online</small></div></div>
+<div class="messages" id="messages" aria-live="polite"><div class="msg assistant">Hello! Welcome to RR AI. I am connected to the secure Groq backend. Ask me a question to get started.</div></div>
 <div class="suggestions"><button type="button" data-prompt="What is RR GLOBAL?">What is RR GLOBAL?</button><button type="button" data-prompt="Give me a study tip.">Study tip</button><button type="button" data-prompt="Help me plan a creative project.">Plan a project</button></div>
 <form class="composer" id="chatForm"><textarea id="prompt" rows="1" placeholder="Type a message…" aria-label="Type a message"></textarea><button type="submit">Send</button></form>
 </section>
-<div class="hint">RR AI · Secure Gemini connection · Never share private information or passwords in chat.</div>
+<div class="hint">RR AI · Secure Groq connection · Never share private information or passwords in chat.</div>
 </main>
 <script>
-const API_BASE_URL = "https://rr-global-ai-api.onrender.com"; // Public backend URL only. Never put the Gemini API key in this file.
+const API_BASE_URL = "https://rr-global-ai-api.onrender.com"; // Public backend URL only. Never put the AI provider API key in this file.
 const form=document.getElementById('chatForm');
 const input=document.getElementById('prompt');
 const messages=document.getElementById('messages');
