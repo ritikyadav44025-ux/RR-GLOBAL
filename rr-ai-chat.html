@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070b14">
-<title>RR AI Chat Prototype — RR GLOBAL</title>
+<title>RR AI Chat — RR GLOBAL</title>
 <style>
 :root{color-scheme:dark;--bg:#070b14;--panel:#0d1728;--line:rgba(164,190,230,.16);--muted:#9aa9c0;--text:#f4f7ff;--cyan:#73e0f4}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% 0%,rgba(38,101,190,.18),transparent 38%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}
@@ -15,18 +15,18 @@ main{padding:34px 0 24px}.intro{text-align:center;margin:0 auto 22px}.intro h1{m
 <body>
 <header><div class="wrap nav"><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
 <main class="wrap">
-<div class="intro"><span class="status">Interactive UI prototype</span><h1>RR AI Chat</h1><p>A secure chat interface prepared for the RR AI Gemini connection.</p></div>
-<div class="notice" id="serviceNotice"><strong>Setup in progress:</strong> RR AI is ready for a secure Gemini connection. The server must be deployed and configured before live answers are available.</div>
+<div class="intro"><span class="status">Secure Gemini backend connected</span><h1>RR AI Chat</h1><p>Chat with RR AI, powered by the secure Gemini backend.</p></div>
+<div class="notice" id="serviceNotice"><strong>Backend connected:</strong> RR AI is ready to send messages securely to the Gemini service.</div>
 <section class="chat" aria-label="RR AI chat prototype">
-<div class="chathead"><div class="orb">AI</div><div><strong>RR AI Assistant</strong><small>Gemini connection pending</small></div></div>
-<div class="messages" id="messages" aria-live="polite"><div class="msg assistant">Hello! Welcome to the RR AI prototype. Try a sample prompt below. This demo uses prepared responses while we build the real AI connection.</div></div>
+<div class="chathead"><div class="orb">AI</div><div><strong>RR AI Assistant</strong><small>Gemini backend · Online</small></div></div>
+<div class="messages" id="messages" aria-live="polite"><div class="msg assistant">Hello! Welcome to RR AI. I am connected to the secure Gemini backend. Ask me a question to get started.</div></div>
 <div class="suggestions"><button type="button" data-prompt="What is RR GLOBAL?">What is RR GLOBAL?</button><button type="button" data-prompt="Give me a study tip.">Study tip</button><button type="button" data-prompt="Help me plan a creative project.">Plan a project</button></div>
 <form class="composer" id="chatForm"><textarea id="prompt" rows="1" placeholder="Type a message…" aria-label="Type a message"></textarea><button type="submit">Send</button></form>
 </section>
-<div class="hint">Chat UI ready · Secure server deployment is the remaining connection step.</div>
+<div class="hint">RR AI · Secure Gemini connection · Never share private information or passwords in chat.</div>
 </main>
 <script>
-const API_BASE_URL = ""; // Add the deployed backend URL here after hosting. Never put the Gemini API key in this file.
+const API_BASE_URL = "https://rr-global-ai-api.onrender.com"; // Public backend URL only. Never put the Gemini API key in this file.
 const form=document.getElementById('chatForm');
 const input=document.getElementById('prompt');
 const messages=document.getElementById('messages');
@@ -49,10 +49,10 @@ async function send(text){
   sendButton.textContent='…';
   try{
     if(!API_BASE_URL){
-      addMessage('The chat interface is ready, but the secure RR AI server has not been deployed yet. Once hosting is configured, this chat will connect to Gemini.','assistant');
+      addMessage('The RR AI service is not configured yet. Please try again later.','assistant');
       return;
     }
-    const response=await fetch(API_BASE_URL.replace(/\\/$/,'')+'/api/chat',{
+    const response=await fetch(API_BASE_URL.replace(/\/$/,'')+'/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({message:value})
