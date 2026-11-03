@@ -3,6 +3,8 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 
 const app = express();
+// Render runs behind a trusted reverse proxy; use its forwarded client IP safely.
+app.set("trust proxy", 1);
 app.use(helmet());
 app.use(express.json({ limit: "20kb" }));
 
