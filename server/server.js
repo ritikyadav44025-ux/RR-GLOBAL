@@ -40,30 +40,43 @@ app.post("/api/chat", async (req, res) => {
       return res.status(400).json({ error: "Please enter a message under 4,000 characters." });
     }
 
-    // Retry temporary Gemini overload/network gateway responses twice.
+    // Retry temporary Gemini HTTP errors and network failures.
     let response;
+    let lastNetworkError;
     for (let attempt = 0; attempt < 3; attempt += 1) {
-      response = await fetch(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": apiKey
-          },
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [{ text: "You are RR AI, the helpful assistant for RR GLOBAL. Be clear, respectful, age-appropriate, and honest. Do not claim capabilities you do not have." }]
+      try {
+        response = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": apiKey
             },
-            contents: [{ role: "user", parts: [{ text: message }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 700 }
-          }),
-          signal: AbortSignal.timeout(25000)
+            body: JSON.stringify({
+              systemInstruction: {
+                parts: [{ text: "You are RR AI, the helpful assistant for RR GLOBAL. Be clear, respectful, age-appropriate, and honest. Do not claim capabilities you do not have." }]
+              },
+              contents: [{ role: "user", parts: [{ text: message }] }],
+              generationConfig: { temperature: 0.7, maxOutputTokens: 700 }
+            }),
+            signal: AbortSignal.timeout(25000)
+          }
+        );
+        lastNetworkError = undefined;
+        if (![500, 502, 503, 504].includes(response.status) || attempt === 2) break;
+      } catch (error) {
+        lastNetworkError = error;
+        console.error("Gemini connection attempt failed:", error?.cause?.code || error?.name || "unknown");
+        if (attempt === 2) {
+          return res.status(502).json({ error: "Gemini could not be reached. Please try again shortly." });
         }
-      );
+      }
+      await new Promise(resolve => setTimeout(resolve, 1200 * (attempt + 1)));
+    }
 
-      if (![500, 502, 503, 504].includes(response.status) || attempt === 2) break;
-      await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+    if (lastNetworkError && !response) {
+      return res.status(502).json({ error: "Gemini could not be reached. Please try again shortly." });
     }
 
     const data = await response.json();
