@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#070b14">
+<link rel="manifest" href="./rr-ai-manifest.json"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="RR AI"><link rel="apple-touch-icon" href="./rr-global-header-logo.png">
 <title>RR AI Chat — RR GLOBAL</title>
 <style>
 :root{color-scheme:dark;--bg:#070b14;--panel:#0d1728;--line:rgba(164,190,230,.16);--muted:#9aa9c0;--text:#f4f7ff;--cyan:#73e0f4}
@@ -1048,5 +1049,8 @@ form.addEventListener('submit',e=>{e.preventDefault();if(input.value.trim()||sel
 input.addEventListener('input',updateActionButton);
 document.querySelectorAll('[data-prompt]').forEach(btn=>btn.addEventListener('click',()=>send(btn.dataset.prompt)));
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(input.value);}});
+</script>
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./rr-ai-sw.js").catch(err=>console.warn("RR AI app update setup:",err)));}
 </script>
 </body></html>
