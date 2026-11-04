@@ -71,7 +71,7 @@ app.post("/api/analyze", (req, res, next) => {
         finally { await parser.destroy(); }
         const pdfText = (extracted?.text || "").trim().slice(0, 18000);
         if (!pdfText) return res.status(422).json({ error: "This PDF has no selectable text. Scanned/image-only PDFs are not supported yet." });
-        content.push({ type: "text", text: "\\n\\nPDF document (" + file.originalname.slice(0, 120) + "), extracted text from up to 10 pages:\\n" + pdfText });
+        content.push({ type: "text", text: "\\n\\nPDF document (" + file.originalname.slice(0, 120) + "), extracted text from up to 10 pages:\n" + pdfText });
       } else {
         const b = file.buffer;
         const validJpeg = file.mimetype === "image/jpeg" && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff;
