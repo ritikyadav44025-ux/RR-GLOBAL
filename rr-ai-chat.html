@@ -97,6 +97,54 @@ main{padding:28px 0 24px}
  .hint{padding:10px 6px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Mobile-first layout refinement */
+@media(max-width:760px){
+  .wrap{width:calc(100% - 22px)}
+  .nav{height:58px}
+  .brand{font-size:13px;gap:7px}
+  .brand img{width:31px;height:31px}
+  .back{font-size:11px}
+  main{padding:16px 0 12px}
+  .intro{margin-bottom:13px}
+  .intro h1{font-size:clamp(26px,5vw,34px);margin:5px 0}
+  .intro p{font-size:13px}
+  .status{font-size:10px;padding:5px 9px}
+  .notice{font-size:12px;line-height:1.5;margin-bottom:12px;padding:10px 12px}
+  .chat{min-height:max(570px,calc(100dvh - 270px));border-radius:18px;overflow:hidden}
+  .chathead{padding:13px 14px;min-height:64px}
+  .orb{width:38px;height:38px}
+  .chathead strong{font-size:14px}
+  .chathead small{font-size:11px}
+  .chathead .chat-actions button{font-size:12px;padding:9px 12px}
+  .messages{flex:1;min-height:330px;max-height:none;padding:18px 14px;gap:17px;overflow-y:auto;overscroll-behavior:contain}
+  .msg{font-size:15px;line-height:1.65;padding:13px 15px;max-width:94%}
+  .message-wrap{max-width:98%}
+  .message-actions{gap:4px;padding-top:7px}
+  .message-actions button{min-height:40px;min-width:42px;padding:8px 9px}
+  .message-actions button .action-label{font-size:11px}
+  .suggestions{padding:0 13px 13px;gap:7px}
+  .suggestions button{font-size:12px;padding:9px 12px}
+  .composer-wrap{padding-bottom:env(safe-area-inset-bottom,0px)}
+  .composer{grid-template-columns:40px minmax(0,1fr) 38px 46px;gap:5px;padding:10px 12px}
+  .composer textarea{font-size:16px;min-height:48px;padding:12px 5px}
+  .composer .plus{width:38px;height:40px;font-size:31px}
+  .composer .mic{width:36px;height:42px;font-size:22px}
+  .composer .voice-mode{width:44px;height:44px}
+  .hint{font-size:11px;padding:10px 8px}
+}
+@media(max-width:390px){
+  .wrap{width:calc(100% - 16px)}
+  .chat{min-height:max(540px,calc(100dvh - 260px))}
+  .messages{padding:14px 10px}
+  .msg{font-size:14px;padding:11px 12px}
+  .message-actions button{min-width:38px;padding:7px}
+  .message-actions button .action-label{font-size:10px}
+  .composer{grid-template-columns:36px minmax(0,1fr) 34px 43px;gap:3px;padding:8px}
+  .composer .plus{width:34px}
+  .composer .mic{width:32px}
+  .composer .voice-mode{width:42px;height:42px}
+}
 </style></head>
 <body>
 <div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><button class="sidebar-search" type="button" id="sidebarSearch">⌕　Search chats</button><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
