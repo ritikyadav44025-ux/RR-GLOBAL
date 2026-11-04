@@ -340,6 +340,24 @@ let voiceCallActive=false;
 let voiceCallSpeaking=false;
 let voiceCallMuted=false;
 let voiceCallLanguage='hi-IN';
+const rrVoicePreferenceKey='rr_ai_voice_preferences_v1';
+let rrVoicePreference={inputLanguage:'auto',outputVoice:'auto'};
+try{const saved=JSON.parse(localStorage.getItem(rrVoicePreferenceKey)||'{}');rrVoicePreference={...rrVoicePreference,...saved};}catch(_){}
+const rrInputLanguage=document.getElementById('rrInputLanguage');
+const rrOutputVoice=document.getElementById('rrOutputVoice');
+if(rrInputLanguage)rrInputLanguage.value=rrVoicePreference.inputLanguage;
+if(rrOutputVoice)rrOutputVoice.value=rrVoicePreference.outputVoice;
+function rrSaveVoicePreferences(){try{localStorage.setItem(rrVoicePreferenceKey,JSON.stringify(rrVoicePreference));}catch(_){}}
+function rrDetectLanguage(text){if(/[\\u0600-\\u06FF]/.test(text))return 'ur-PK';if(/[\\u0900-\\u097F]/.test(text))return 'hi-IN';return 'en-IN';}
+function rrChooseVoice(text){
+  const voices=window.speechSynthesis?.getVoices?.()||[];
+  const pref=rrVoicePreference.outputVoice||'auto';
+  const detected=rrDetectLanguage(text);
+  const [wantedLang,wantedGender]=pref==='auto'?[detected,'auto']:pref.split('|');
+  const langMatches=voices.filter(v=>v.lang.toLowerCase().startsWith(wantedLang.slice(0,2).toLowerCase()));
+  const genderMatch=langMatches.find(v=>wantedGender!=='auto'&&(wantedGender==='female'?/female|woman|zira|samantha|heera|kalpana|lekha|sara|sadia|rabia/i.test(v.name):/male|man|david|mark|ravi|hemant|daniel/i.test(v.name)));
+  return {voice:genderMatch||langMatches[0]||voices.find(v=>v.lang.toLowerCase().startsWith('en'))||null,lang:wantedLang,genderMatched:!wantedGender||wantedGender==='auto'||!!genderMatch};
+}
 function updateActionButton(){const hasText=!!input.value.trim()||selectedFiles.length>0;voiceModeButton.classList.toggle('send-mode',hasText);voiceModeButton.title=hasText?'Send message':'Voice replies';voiceModeButton.setAttribute('aria-label',hasText?'Send message':'Toggle voice replies');}
 
 function actionIcon(name){
@@ -458,9 +476,9 @@ function speakRRReply(text,isCall){
   synth.cancel();
   const runId=++rrSpeechRunId;
   const cleanText=String(text).replace(/\\s+/g,' ').trim();
-  const lang=/[\\u0900-\\u097F]/.test(cleanText)?'hi-IN':'en-IN';
-  const voices=synth.getVoices();
-  const voice=voices.find(v=>v.lang.toLowerCase()===lang.toLowerCase())||voices.find(v=>v.lang.toLowerCase().startsWith(lang.slice(0,2)));
+  const selected=rrChooseVoice(cleanText);
+  const lang=selected.lang;
+  const voice=selected.voice;
   if(isCall){voiceCallSpeaking=true;setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='जवाब सुनें — बीच में बोलें, RR AI रुककर सुनेगा';if(!isListening&&!voiceCallMuted)startVoiceCallListening();}
   const utterance=new SpeechSynthesisUtterance(cleanText);
   utterance.lang=lang;utterance.rate=0.97;utterance.pitch=1;utterance.volume=1;
@@ -562,10 +580,26 @@ document.getElementById('rrVoiceMute').addEventListener('click',()=>{
   else{setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}
 });
 document.getElementById('rrVoiceSettings').addEventListener('click',()=>{
-  voiceCallLanguage=voiceCallLanguage==='hi-IN'?'en-IN':'hi-IN';
-  const b=document.getElementById('rrVoiceSettings');b.textContent=voiceCallLanguage==='hi-IN'?'हि':'EN';
-  setVoiceScreenState(voiceCallLanguage==='hi-IN'?'● HINDI MODE':'● ENGLISH MODE');
-  if(recognition&&isListening)recognition.stop();else startVoiceCallListening();
+  const panel=document.getElementById('rrVoiceSettingsPanel');
+  panel.hidden=!panel.hidden;
+});
+document.getElementById('rrVoiceSettingsClose').addEventListener('click',()=>{document.getElementById('rrVoiceSettingsPanel').hidden=true;});
+rrInputLanguage.addEventListener('change',()=>{
+  rrVoicePreference.inputLanguage=rrInputLanguage.value;
+  voiceCallLanguage=rrVoicePreference.inputLanguage==='auto'?'hi-IN':rrVoicePreference.inputLanguage;
+  rrSaveVoicePreferences();
+  if(recognition&&isListening)recognition.stop();
+  if(voiceCallActive&&!voiceCallMuted)startVoiceCallListening();
+  document.getElementById('rrVoiceSettingsNote').textContent=rrVoicePreference.inputLanguage==='auto'?'Auto input currently starts with Hindi; browser speech recognition does not reliably switch languages mid-sentence.':'Input recognition set to '+rrInputLanguage.options[rrInputLanguage.selectedIndex].text+'.';
+});
+rrOutputVoice.addEventListener('change',()=>{
+  rrVoicePreference.outputVoice=rrOutputVoice.value;
+  rrSaveVoicePreferences();
+  if('speechSynthesis' in window)window.speechSynthesis.cancel();
+  const option=rrOutputVoice.options[rrOutputVoice.selectedIndex].text;
+  const available=window.speechSynthesis?.getVoices?.()||[];
+  const note=document.getElementById('rrVoiceSettingsNote');
+  note.textContent=rrVoicePreference.outputVoice==='auto'?'Auto voice will follow the language detected in RR AI replies.':(available.some(v=>v.lang.toLowerCase().startsWith(rrVoicePreference.outputVoice.split('|')[0].slice(0,2)))?'Selected '+option+'. Exact male/female voice depends on voices installed on this device.':'No matching language voice is installed on this device yet; RR AI will use the closest available voice.');
 });
 document.getElementById('rrVoiceAttach').addEventListener('click',()=>document.getElementById('rrVoiceAttachMenu').classList.toggle('open'));
 document.querySelectorAll('[data-voice-pick]').forEach(btn=>btn.addEventListener('click',()=>{document.getElementById('rrVoiceAttachMenu').classList.remove('open');document.getElementById(btn.dataset.voicePick).click();}));
