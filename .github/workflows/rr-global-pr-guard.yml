@@ -1,0 +1,45 @@
+name: RR GLOBAL PR Guard
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rr-global-pr-guard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review-guard:
+    name: Basic PR safety checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out proposed changes
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan added lines for common secret patterns
+        shell: bash
+        env:
+          BASE_REF: ${{ github.base_ref || 'main' }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$BASE_REF"
+          ADDED_LINES="$(git diff --no-ext-diff --unified=0 "origin/$BASE_REF...HEAD" -- . ':!*.lock' | grep -E '^\+[^+]' || true)"
+          if printf '%s\n' "$ADDED_LINES" | grep -Eiq '(gsk_[A-Za-z0-9]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|sk-proj-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16})'; then
+            echo "::error::A possible API key or credential was found in added lines. Remove it and use the approved secret store."
+            exit 1
+          fi
+          echo "No common hard-coded secret pattern found in added lines."
+
+      - name: Confirm approval policy exists
+        shell: bash
+        run: |
+          test -s CONTRIBUTING.md
+          test -s .github/PULL_REQUEST_TEMPLATE.md
+          echo "RR GLOBAL approval policy and PR template are present."
