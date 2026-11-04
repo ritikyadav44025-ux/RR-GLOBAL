@@ -347,6 +347,7 @@ const rrInputLanguage=document.getElementById('rrInputLanguage');
 const rrOutputVoice=document.getElementById('rrOutputVoice');
 if(rrInputLanguage)rrInputLanguage.value=rrVoicePreference.inputLanguage;
 if(rrOutputVoice)rrOutputVoice.value=rrVoicePreference.outputVoice;
+voiceCallLanguage=rrVoicePreference.inputLanguage==='auto'?'hi-IN':rrVoicePreference.inputLanguage;
 function rrSaveVoicePreferences(){try{localStorage.setItem(rrVoicePreferenceKey,JSON.stringify(rrVoicePreference));}catch(_){}}
 function rrDetectLanguage(text){if(/[\\u0600-\\u06FF]/.test(text))return 'ur-PK';if(/[\\u0900-\\u097F]/.test(text))return 'hi-IN';return 'en-IN';}
 function rrChooseVoice(text){
@@ -399,7 +400,9 @@ function addMessage(text,kind){
       window.speechSynthesis.cancel();
       document.querySelectorAll('.message-actions button.speaking').forEach(btn=>{btn.classList.remove('speaking');btn.innerHTML=actionIcon('listen');});
       const spoken=new SpeechSynthesisUtterance(text);
-      spoken.lang=/[\u0900-\u097F]/.test(text)?'hi-IN':'en-IN';
+      const selectedVoice=rrChooseVoice(text);
+      spoken.lang=selectedVoice.lang;
+      if(selectedVoice.voice)spoken.voice=selectedVoice.voice;
       spoken.onend=()=>{listen.classList.remove('speaking');listen.innerHTML=actionIcon('listen');};
       spoken.onerror=()=>{listen.classList.remove('speaking');listen.innerHTML=actionIcon('listen');voiceHint.textContent='Could not play this reply aloud.';};
       listen.classList.add('speaking');listen.textContent='■';window.speechSynthesis.speak(spoken);
