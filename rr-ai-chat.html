@@ -685,7 +685,7 @@ header{background:linear-gradient(180deg,rgba(9,17,31,.96),rgba(7,12,22,.88));bo
 
 </style></head>
 <body>
-<div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><button class="sidebar-search" type="button" id="sidebarSearch">⌕　Search chats</button><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
+<div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><input class="sidebar-search" type="search" id="sidebarSearch" placeholder="⌕  Search chats" aria-label="Search chats"><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
 <main class="wrap">
 <div class="intro"><span class="status">Secure Groq backend connected</span><h1>RR AI Chat</h1><p>Chat with RR AI, powered by the secure Groq backend.</p></div>
 <div class="notice" id="serviceNotice"><strong>Backend connected:</strong> RR AI is ready. Tap the microphone to dictate a message in Hindi or English.</div>
@@ -723,15 +723,42 @@ document.getElementById('sidebarSearch').addEventListener('click',()=>{voiceHint
 document.getElementById('sidebarChat').addEventListener('click',()=>{toggleSidebar(false);input.focus();});
 document.getElementById('sidebarImages').addEventListener('click',()=>{toggleSidebar(false);document.getElementById('photoInput').click();});
 document.getElementById('sidebarPinnedChat').addEventListener('click',()=>{toggleSidebar(false);input.focus();});
-function refreshSidebarRecents(){const list=document.getElementById('sidebarRecents');if(!list)return;list.innerHTML='';const items=conversationHistory.filter(m=>m.role==='user').slice(-6).reverse();if(!items.length){const b=document.createElement('button');b.className='sidebar-item sidebar-chat';b.type='button';b.textContent='New conversation';list.appendChild(b);return;}items.forEach(m=>{const b=document.createElement('button');b.className='sidebar-item sidebar-chat';b.type='button';b.textContent=m.content.replace(/\s+/g,' ').slice(0,36);b.addEventListener('click',()=>{toggleSidebar(false);voiceHint.textContent='Recent chat switching is coming soon.';});list.appendChild(b);});}
+function refreshSidebarRecents(){
+  const list=document.getElementById('sidebarRecents');
+  if(!list)return;
+  const query=(document.getElementById('sidebarSearch')?.value||'').trim().toLowerCase();
+  list.innerHTML='';
+  const items=[...chatConversations].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0)).filter(chat=>{
+    if(!query)return true;
+    return (chat.title+' '+chat.messages.map(m=>m.content).join(' ')).toLowerCase().includes(query);
+  }).slice(0,12);
+  if(!items.length){
+    const empty=document.createElement('div');
+    empty.className='sidebar-label';
+    empty.textContent=query?'No matching chats':'Your recent chats will appear here';
+    list.appendChild(empty);
+    return;
+  }
+  items.forEach(chat=>{
+    const b=document.createElement('button');
+    b.className='sidebar-item sidebar-chat';
+    b.type='button';
+    b.textContent=chat.title||'New conversation';
+    b.title=chat.title||'New conversation';
+    b.setAttribute('aria-current',chat.id===activeConversationId?'page':'false');
+    b.addEventListener('click',()=>{loadConversation(chat.id);toggleSidebar(false);});
+    list.appendChild(b);
+  });
+}
 
 const form=document.getElementById('chatForm');
 const input=document.getElementById('prompt');
 const messages=document.getElementById('messages');
-const sendButton=form.querySelector('button[type="submit"]');
 const micButton=document.getElementById('micButton');
 const voiceHint=document.getElementById('voiceHint');
 const voiceModeButton=document.getElementById('voiceModeButton');
+// The round action button is the send control when text/files are present.
+const sendButton=voiceModeButton;
 const newChatButton=document.getElementById('newChatButton');
 const attachMenu=document.getElementById('attachMenu');
 const attachmentsBox=document.getElementById('attachments');
@@ -748,9 +775,80 @@ let sharedMemory=[];
 try{const savedMemory=JSON.parse(localStorage.getItem(SHARED_MEMORY_KEY)||"[]");if(Array.isArray(savedMemory))sharedMemory=savedMemory.filter(m=>m&&["user","assistant"].includes(m.role)&&typeof m.content==="string").slice(-24);}catch(_){sharedMemory=[];}
 function rememberAcrossChats(entry){try{if(!entry||!entry.content)return;sharedMemory.push({role:entry.role,content:String(entry.content).slice(0,1800)});sharedMemory=sharedMemory.slice(-24);localStorage.setItem(SHARED_MEMORY_KEY,JSON.stringify(sharedMemory));}catch(_){voiceHint.textContent="Cross-chat memory could not be saved on this device.";}}
 function buildContext(){const current=conversationHistory.slice(-12);const currentKeys=new Set(current.map(m=>m.role+"|"+m.content));const previous=sharedMemory.filter(m=>!currentKeys.has(m.role+"|"+m.content)).slice(-8);return [...previous,...current].slice(-20);}
-try{const saved=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");if(Array.isArray(saved)){conversationHistory=saved.filter(m=>m&&["user","assistant"].includes(m.role)&&typeof m.content==="string").slice(-30);if(conversationHistory.length){messages.innerHTML="";conversationHistory.forEach(m=>addMessage(m.content,m.role));}}}catch(_){conversationHistory=[];}
-function saveConversation(){try{localStorage.setItem(HISTORY_KEY,JSON.stringify(conversationHistory.slice(-30)));refreshSidebarRecents();}catch(_){voiceHint.textContent="Conversation could not be saved on this device. Storage may be unavailable.";}}
+const CHAT_STORE_KEY="rr_ai_conversations_v1";
+let chatConversations=[];
+let activeConversationId=null;
+function cleanMessages(items){return Array.isArray(items)?items.filter(m=>m&&["user","assistant"].includes(m.role)&&typeof m.content==="string").slice(-100):[];}
+function makeChatTitle(items){const first=items.find(m=>m.role==="user");return first?first.content.replace(/\s+/g," ").replace(/📎.*/,"").trim().slice(0,48)||"New conversation":"New conversation";}
+function persistChatStore(){
+  try{localStorage.setItem(CHAT_STORE_KEY,JSON.stringify(chatConversations.slice(-50)));}
+  catch(_){voiceHint.textContent="Chat history could not be saved. Device storage may be full.";}
+}
+function renderActiveConversation(){
+  messages.innerHTML="";
+  if(conversationHistory.length)conversationHistory.forEach(m=>addMessage(m.content,m.role));
+  else addMessage("Hello! Welcome to RR AI. I am connected to the secure Groq backend. Ask me a question to get started.","assistant");
+}
+function loadConversation(id){
+  const chat=chatConversations.find(item=>item.id===id);
+  if(!chat)return;
+  activeConversationId=chat.id;
+  conversationHistory=cleanMessages(chat.messages);
+  renderActiveConversation();
+  selectedFiles=[];
+  renderAttachments();
+  refreshSidebarRecents();
+}
+function startNewConversation(){
+  const id="chat-"+Date.now()+"-"+Math.random().toString(36).slice(2,7);
+  const chat={id,title:"New conversation",messages:[],updatedAt:Date.now()};
+  chatConversations.unshift(chat);
+  activeConversationId=id;
+  conversationHistory=[];
+  selectedFiles=[];
+  renderAttachments();
+  renderActiveConversation();
+  persistChatStore();
+  refreshSidebarRecents();
+  attachMenu.classList.remove('open');
+  input.value='';
+  updateActionButton();
+  input.focus();
+}
+try{
+  const stored=JSON.parse(localStorage.getItem(CHAT_STORE_KEY)||"null");
+  if(Array.isArray(stored)){
+    chatConversations=stored.filter(c=>c&&typeof c.id==="string").map(c=>({id:c.id,title:typeof c.title==="string"?c.title:"New conversation",messages:cleanMessages(c.messages),updatedAt:Number(c.updatedAt)||0})).slice(-50);
+  }
+  if(!chatConversations.length){
+    const legacy=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
+    const migrated=cleanMessages(legacy);
+    if(migrated.length)chatConversations=[{id:"chat-migrated-"+Date.now(),title:makeChatTitle(migrated),messages:migrated,updatedAt:Date.now()}];
+  }
+}catch(_){chatConversations=[];}
+if(chatConversations.length){
+  const latest=[...chatConversations].sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+  activeConversationId=latest.id;
+  conversationHistory=cleanMessages(latest.messages);
+}
+function saveConversation(){
+  let active=chatConversations.find(c=>c.id===activeConversationId);
+  if(!active){
+    active={id:activeConversationId||("chat-"+Date.now()),title:"New conversation",messages:[],updatedAt:Date.now()};
+    activeConversationId=active.id;
+    chatConversations.unshift(active);
+  }
+  active.messages=cleanMessages(conversationHistory);
+  active.title=makeChatTitle(active.messages);
+  active.updatedAt=Date.now();
+  chatConversations=chatConversations.filter(c=>c.id!==active.id).concat(active).slice(-50);
+  persistChatStore();
+  try{localStorage.setItem(HISTORY_KEY,JSON.stringify(conversationHistory.slice(-30)));}catch(_){}
+  refreshSidebarRecents();
+}
+renderActiveConversation();
 refreshSidebarRecents();
+document.getElementById('sidebarSearch')?.addEventListener('input',refreshSidebarRecents);
 let voiceRepliesEnabled=false;
 let voiceCallActive=false;
 let voiceCallSpeaking=false;
@@ -766,7 +864,7 @@ if(rrInputLanguage)rrInputLanguage.value=rrVoicePreference.inputLanguage;
 if(rrOutputVoice)rrOutputVoice.value=rrVoicePreference.outputVoice;
 voiceCallLanguage=rrVoicePreference.inputLanguage==='auto'?'hi-IN':rrVoicePreference.inputLanguage;
 function rrSaveVoicePreferences(){try{localStorage.setItem(rrVoicePreferenceKey,JSON.stringify(rrVoicePreference));}catch(_){}}
-function rrDetectLanguage(text){if(/[\\u0600-\\u06FF]/.test(text))return 'ur-PK';if(/[\\u0900-\\u097F]/.test(text))return 'hi-IN';return 'en-IN';}
+function rrDetectLanguage(text){if(/[\u0600-\u06FF]/.test(text))return 'ur-PK';if(/[\u0900-\u097F]/.test(text))return 'hi-IN';return 'en-IN';}
 function rrChooseVoice(text){
   const voices=window.speechSynthesis?.getVoices?.()||[];
   const pref=rrVoicePreference.outputVoice||'auto';
@@ -774,7 +872,7 @@ function rrChooseVoice(text){
   const [wantedLang,wantedGender]=pref==='auto'?[detected,'auto']:pref.split('|');
   const langMatches=voices.filter(v=>v.lang.toLowerCase().startsWith(wantedLang.slice(0,2).toLowerCase()));
   const genderMatch=langMatches.find(v=>wantedGender!=='auto'&&(wantedGender==='female'?/female|woman|zira|samantha|heera|kalpana|lekha|sara|sadia|rabia/i.test(v.name):/male|man|david|mark|ravi|hemant|daniel/i.test(v.name)));
-  return {voice:genderMatch||langMatches[0]||voices.find(v=>v.lang.toLowerCase().startsWith('en'))||null,lang:wantedLang,genderMatched:!wantedGender||wantedGender==='auto'||!!genderMatch};
+  const chosenVoice=genderMatch||langMatches[0]||voices.find(v=>v.lang.toLowerCase().startsWith('en'))||null;return {voice:chosenVoice,lang:chosenVoice?.lang||wantedLang,genderMatched:!wantedGender||wantedGender==='auto'||!!genderMatch};
 }
 function updateActionButton(){const hasText=!!input.value.trim()||selectedFiles.length>0;voiceModeButton.classList.toggle('send-mode',hasText);voiceModeButton.title=hasText?'Send message':'Voice replies';voiceModeButton.setAttribute('aria-label',hasText?'Send message':'Toggle voice replies');}
 
@@ -843,8 +941,9 @@ async function send(text){
   rememberAcrossChats({role:'user',content:shownMessage});
   saveConversation();
   input.value='';
+  updateActionButton();
   sendButton.disabled=true;
-  sendButton.textContent='…';
+  sendButton.setAttribute('aria-busy','true');
   try{
     if(!API_BASE_URL){
       addMessage('The RR AI service is not configured yet. Please try again later.','assistant');
@@ -879,7 +978,8 @@ async function send(text){
     addMessage(error.message || 'Could not reach RR AI. Please try again later.','assistant');
   }finally{
     sendButton.disabled=false;
-    sendButton.textContent='↑';
+    sendButton.removeAttribute('aria-busy');
+    updateActionButton();
     if(!voiceCallActive)input.focus();else{
       input.blur();document.getElementById('rrVoiceText').blur();
       if(voiceCallThinking&&!voiceCallSpeaking){
@@ -913,7 +1013,7 @@ function speakRRReply(text,isCall){
     .replace(/[★☆✦✧⭐✨]+/g,'')
     .replace(/[ \\t]+/g,' ')
     .replace(/\\n{2,}/g,'. ')
-    .replace(/\\s+/g,' ')
+    .replace(/\s+/g,' ')
     .trim();
   const selected=rrChooseVoice(cleanText);
   const lang=selected.lang;
@@ -928,9 +1028,9 @@ function speakRRReply(text,isCall){
 }
 function setVoiceScreenState(label,listening=false){const state=document.getElementById('rrVoiceState'),caption=document.getElementById('rrVoiceCaption'),orb=document.getElementById('rrVoiceOrb');if(state)state.textContent=label;if(caption)caption.textContent=listening?'Listening...':(label.includes('SPEAKING')?'Speaking...':label.replace('● ',''));if(orb)orb.classList.toggle('listening',listening);}
 function openRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.add('open');document.body.style.overflow='hidden';setVoiceScreenState('● RR AI LISTENING',true);}
-function closeRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.remove('open');document.body.style.overflow='';}
-function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallMuted||voiceCallSpeaking||voiceCallThinking||isListening)return;try{recognition.lang=voiceCallLanguage;recognition.continuous=false;recognition.interimResults=true;recognition.start();setVoiceScreenState('● RR AI LISTENING',true);}catch(err){setVoiceScreenState('● TAP TO RETRY');document.getElementById('rrVoiceCaption').textContent='माइक्रोफ़ोन शुरू नहीं हो पाया। Chrome में साइट खोलकर माइक्रोफ़ोन अनुमति दें और फिर दोबारा कोशिश करें।';}}
- function stopVoiceCall(){voiceCallActive=false;voiceCallSpeaking=false;voiceCallThinking=false;voiceCallMuted=false;rrSpeechRunId++;if(recognition&&isListening)recognition.stop();if('speechSynthesis' in window)window.speechSynthesis.cancel();voiceModeButton.classList.remove('active');voiceModeButton.setAttribute('aria-pressed','false');voiceModeButton.classList.remove('voice-call-active');document.getElementById('rrVoiceMute').classList.remove('muted');document.getElementById('rrVoiceMute').textContent='♩̸';closeRRVoiceScreen();voiceHint.textContent='Voice call ended.';}
+function closeRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.remove('open');document.body.style.overflow='';}\ndocument.getElementById('rrVoiceOrb').addEventListener('click',()=>{if(!voiceCallActive)return;voiceRecognitionNeedsRetry=false;if(recognition&&isListening){try{recognition.stop();}catch(_){}}setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();});
+let voiceRecognitionNeedsRetry=false;\nfunction startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallMuted||voiceCallSpeaking||voiceCallThinking||isListening||voiceRecognitionNeedsRetry)return;try{recognition.lang=voiceCallLanguage;recognition.continuous=false;recognition.interimResults=true;recognition.start();setVoiceScreenState('● RR AI LISTENING',true);}catch(err){voiceRecognitionNeedsRetry=true;setVoiceScreenState('● TAP ORB TO RETRY');document.getElementById('rrVoiceCaption').textContent='माइक्रोफ़ोन शुरू नहीं हो पाया। Orb पर टैप करके फिर कोशिश करें; अनुमति न हो तो Chrome site settings में microphone allow करें।';}}
+ function stopVoiceCall(){voiceRecognitionNeedsRetry=false;voiceCallActive=false;voiceCallSpeaking=false;voiceCallThinking=false;voiceCallMuted=false;rrSpeechRunId++;if(recognition&&isListening)recognition.stop();if('speechSynthesis' in window)window.speechSynthesis.cancel();voiceModeButton.classList.remove('active');voiceModeButton.setAttribute('aria-pressed','false');voiceModeButton.classList.remove('voice-call-active');document.getElementById('rrVoiceMute').classList.remove('muted');document.getElementById('rrVoiceMute').textContent='♩̸';closeRRVoiceScreen();voiceHint.textContent='Voice call ended.';}
  if(!SpeechRecognition){
    micButton.addEventListener('click',()=>{voiceHint.textContent='Voice input is not supported in this browser. Try the latest Chrome browser.';});
  }else{
@@ -962,14 +1062,25 @@ function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallM
      }else if(transcript)input.value=transcript;
    };
    recognition.onerror=(event)=>{
-     if(voiceCallActive){setVoiceScreenState(event.error==='not-allowed'?'● MICROPHONE PERMISSION NEEDED':'● RECONNECTING');if(event.error==='not-allowed')stopVoiceCall();return;}
+     if(voiceCallActive){
+       const blocked=['not-allowed','service-not-allowed','audio-capture','network'].includes(event.error);
+       voiceRecognitionNeedsRetry=blocked;
+       setVoiceScreenState(blocked?'● TAP ORB TO RETRY':'● RECONNECTING');
+       const caption=document.getElementById('rrVoiceCaption');
+       if(caption)caption.textContent=event.error==='not-allowed'||event.error==='service-not-allowed'
+         ?'माइक्रोफ़ोन अनुमति नहीं मिली। Chrome site settings में microphone allow करें, फिर orb पर टैप करें।'
+         :event.error==='audio-capture'?'माइक्रोफ़ोन उपलब्ध नहीं है। दूसरे ऐप में mic बंद करके orb पर टैप करें।'
+         :event.error==='network'?'Speech service का network connection नहीं मिला। Internet जाँचकर orb पर टैप करें।'
+         :'आवाज़ साफ़ नहीं मिली। फिर बोलें।';
+       return;
+     }
      voiceHint.textContent=event.error==='not-allowed'
        ?'Microphone permission blocked. Allow microphone access in browser settings.'
        :'Voice input error: '+event.error+'. Please try again.';
    };
    recognition.onend=()=>{
      isListening=false;micButton.classList.remove('listening');micButton.textContent='🎙️';micButton.setAttribute('aria-label','Start voice input');
-     if(voiceCallActive){if(voiceCallMuted||voiceCallSpeaking||voiceCallThinking)return;setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();return;}
+     if(voiceCallActive){if(voiceCallMuted||voiceCallSpeaking||voiceCallThinking)return;if(voiceRecognitionNeedsRetry){setVoiceScreenState('● TAP ORB TO RETRY');return;}setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();return;}
      voiceHint.textContent=input.value.trim()?'Voice captured. Check the text, then tap Send.':'Tap the microphone and speak in Hindi.';
    };
    micButton.addEventListener('click',()=>{
@@ -979,7 +1090,7 @@ function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallM
  }
 
 newChatButton.addEventListener('click',()=>{attachMenu.classList.toggle('open');});
-newConversationButton.addEventListener('click',()=>{if(!confirm('Start a new chat? The current conversation will be cleared from this device.'))return;conversationHistory=[];try{localStorage.removeItem(HISTORY_KEY);}catch(_){}messages.innerHTML='';addMessage('Hello! Welcome to RR AI. I am connected to the secure Groq backend. Ask me a question to get started.','assistant');attachMenu.classList.remove('open');input.focus();});
+newConversationButton.addEventListener('click',startNewConversation);
 [photoInput,cameraInput,fileInput].forEach(el=>el.addEventListener('change',()=>{
   const incoming=Array.from(el.files||[]);
   selectedFiles=[...selectedFiles,...incoming].slice(0,3);
@@ -999,7 +1110,7 @@ function renderAttachments(){
   updateActionButton();
 }
 
-voiceModeButton.addEventListener('click',()=>{if(input.value.trim()||selectedFiles.length){voiceHint.textContent='पहले मैसेज भेजें या टेक्स्ट हटाएँ, फिर Voice Call शुरू करें।';return;}if(voiceCallActive){stopVoiceCall();return;}if(!recognition){voiceHint.textContent='इस ब्राउज़र में Voice Call सपोर्ट नहीं है। RR AI को Chrome में खोलकर कोशिश करें।';return;}if(!window.isSecureContext){voiceHint.textContent='माइक्रोफ़ोन के लिए सुरक्षित HTTPS कनेक्शन ज़रूरी है।';return;}voiceRepliesEnabled=false;voiceCallActive=true;voiceCallMuted=false;voiceModeButton.classList.add('active','voice-call-active');voiceModeButton.setAttribute('aria-pressed','true');openRRVoiceScreen();voiceHint.textContent='RR AI voice chat is active.';document.getElementById('rrVoiceCaption').textContent='माइक्रोफ़ोन चालू हो रहा है…';startVoiceCallListening();});
+voiceModeButton.addEventListener('click',()=>{if(input.value.trim()||selectedFiles.length){send(input.value);return;}if(voiceCallActive){stopVoiceCall();return;}if(!recognition){voiceHint.textContent='इस ब्राउज़र में Voice Call सपोर्ट नहीं है। RR AI को Chrome में खोलकर कोशिश करें।';return;}if(!window.isSecureContext){voiceHint.textContent='माइक्रोफ़ोन के लिए सुरक्षित HTTPS कनेक्शन ज़रूरी है।';return;}voiceRepliesEnabled=false;voiceRecognitionNeedsRetry=false;voiceCallActive=true;voiceCallMuted=false;voiceModeButton.classList.add('active','voice-call-active');voiceModeButton.setAttribute('aria-pressed','true');openRRVoiceScreen();voiceHint.textContent='RR AI voice chat is active.';document.getElementById('rrVoiceCaption').textContent='माइक्रोफ़ोन चालू हो रहा है…';startVoiceCallListening();});
 
 document.getElementById('rrVoiceEnd').addEventListener('click',stopVoiceCall);
 document.getElementById('rrVoiceMenu').addEventListener('click',stopVoiceCall);

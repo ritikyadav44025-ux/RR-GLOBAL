@@ -1,0 +1,58 @@
+name: RR GLOBAL Development CI
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rr-global-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate project files and backend syntax
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate required project files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s README.md
+          test -s rr-ai-chat.html
+          test -s rr-ai-manifest.json
+          test -s server/server.js
+          test -s server/package.json
+          test -s CONTRIBUTING.md
+          test -s .github/PULL_REQUEST_TEMPLATE.md
+          echo "Required RR GLOBAL project files are present."
+
+      - name: Validate JSON configuration
+        run: node -e "JSON.parse(require('node:fs').readFileSync('rr-ai-manifest.json', 'utf8')); JSON.parse(require('node:fs').readFileSync('server/package.json', 'utf8')); console.log('JSON files are valid.')"
+
+      - name: Check backend JavaScript syntax
+        run: node --check server/server.js
+
+      - name: Scan tracked source for common hard-coded credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -n -I -E '(gsk_[A-Za-z0-9]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|sk-proj-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16})' -- ':!*.lock'; then
+            echo "::error::A common credential pattern was found in tracked source. Remove it and use the hosting secret store."
+            exit 1
+          fi
+          echo "No common hard-coded credential pattern found."
