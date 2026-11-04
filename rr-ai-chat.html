@@ -844,6 +844,7 @@ async function send(text){
   rememberAcrossChats({role:'user',content:shownMessage});
   saveConversation();
   input.value='';
+  updateActionButton();
   sendButton.disabled=true;
   sendButton.setAttribute('aria-busy','true');
   try{
@@ -881,6 +882,7 @@ async function send(text){
   }finally{
     sendButton.disabled=false;
     sendButton.removeAttribute('aria-busy');
+    updateActionButton();
     if(!voiceCallActive)input.focus();else{
       input.blur();document.getElementById('rrVoiceText').blur();
       if(voiceCallThinking&&!voiceCallSpeaking){
