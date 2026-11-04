@@ -259,6 +259,14 @@ header{background:linear-gradient(180deg,rgba(9,17,31,.96),rgba(7,12,22,.88));bo
 /* Use the repository's RR GLOBAL logo asset consistently in voice mode. */
 .rr-voice-orb:before{content:"";inset:18%;background:url("rr-global-header-logo.png") center/contain no-repeat;filter:drop-shadow(0 0 12px #00baff) drop-shadow(0 0 28px #246bff);text-shadow:none}
 .rr-voice-brand:before{content:"";display:block;flex:0 0 48px;background:#08152a url("rr-global-header-logo.png") center/contain no-repeat;color:transparent;font-size:0;letter-spacing:0}
+
+.rr-voice-settings-panel{position:absolute;z-index:5;top:calc(86px + env(safe-area-inset-top));right:18px;width:min(340px,calc(100vw - 36px));padding:17px;border:1px solid rgba(120,190,255,.3);border-radius:18px;background:rgba(12,20,35,.97);box-shadow:0 18px 55px #000a;backdrop-filter:blur(18px);color:#f5f8ff}
+.rr-voice-settings-panel[hidden]{display:none}
+.rr-voice-settings-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;font-size:15px}
+.rr-voice-settings-head button{border:0;border-radius:50%;width:32px;height:32px;background:#263349;color:#fff;font-size:22px}
+.rr-voice-settings-panel label{display:block;margin:12px 0 6px;color:#a9bdd8;font-size:12px}
+.rr-voice-settings-panel select{width:100%;padding:12px;border:1px solid #40536e;border-radius:11px;background:#17263d;color:#fff;font:inherit;font-size:14px}
+.rr-voice-settings-panel p{margin:12px 0 0;color:#9eabc0;font-size:11px;line-height:1.5}
 </style></head>
 <body>
 <div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><button class="sidebar-search" type="button" id="sidebarSearch">⌕　Search chats</button><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
@@ -274,7 +282,19 @@ header{background:linear-gradient(180deg,rgba(9,17,31,.96),rgba(7,12,22,.88));bo
 <div class="hint" id="voiceHint">RR AI · Secure Groq connection · Voice input uses your browser speech recognition.</div>
 </main>
 <section class="rr-voice-screen" id="rrVoiceScreen" aria-label="RR AI voice chat"><div class="rr-voice-top"><button class="rr-voice-iconbtn" id="rrVoiceMenu" type="button" aria-label="Back to chat">☰</button><div class="rr-voice-brand"><span>RR GLOBAL<br><small>RR AI Voice</small></span></div><button class="rr-voice-iconbtn" id="rrVoiceSettings" type="button" aria-label="Voice settings">☷</button></div><div class="rr-voice-state" id="rrVoiceState">● RR AI READY</div><div class="rr-voice-orb-wrap"><div class="rr-voice-orb" id="rrVoiceOrb"></div><div class="rr-voice-caption" id="rrVoiceCaption">Speak naturally with RR AI</div></div><div class="rr-voice-bottom"><div class="rr-voice-attach-wrap"><button class="rr-voice-attach" id="rrVoiceAttach" type="button" aria-label="Attach photo or file">＋</button><div class="rr-voice-attach-menu" id="rrVoiceAttachMenu"><button type="button" data-voice-pick="photoInput">Photos</button><button type="button" data-voice-pick="cameraInput">Camera</button><button type="button" data-voice-pick="fileInput">Files / PDF</button></div></div><input class="rr-voice-input" id="rrVoiceText" type="text" placeholder="Message RR AI" aria-label="Message RR AI"><button class="rr-voice-mute" id="rrVoiceMute" type="button" aria-label="Interrupt reply and speak" title="Stop reply and speak">♩̸</button><button class="rr-voice-end" id="rrVoiceEnd" type="button" aria-label="End voice chat">×</button></div></section>
-<script>
+<div class="rr-voice-settings-panel" id="rrVoiceSettingsPanel" hidden role="dialog" aria-label="Voice and language settings">
+  <div class="rr-voice-settings-head"><strong>Voice & Language</strong><button type="button" id="rrVoiceSettingsClose" aria-label="Close settings">×</button></div>
+  <label for="rrInputLanguage">Speech recognition language</label>
+  <select id="rrInputLanguage"><option value="auto">Auto (Hindi default)</option><option value="hi-IN">Hindi</option><option value="ur-PK">Urdu</option><option value="en-IN">English</option></select>
+  <label for="rrOutputVoice">RR AI speaking voice</label>
+  <select id="rrOutputVoice">
+    <option value="auto">Auto voice — match reply language</option>
+    <option value="hi-IN|male">Hindi — Male</option><option value="hi-IN|female">Hindi — Female</option>
+    <option value="ur-PK|male">Urdu — Male</option><option value="ur-PK|female">Urdu — Female</option>
+    <option value="en-IN|male">English — Male</option><option value="en-IN|female">English — Female</option>
+  </select>
+  <p id="rrVoiceSettingsNote">Available voices depend on voices installed by your browser/device. Auto selects the closest available language voice.</p>
+</div>\n<script>
 const API_BASE_URL = "https://rr-global-ai-api.onrender.com"; // Public backend URL only. Never put the AI provider API key in this file.
 
 const rrSidebar=document.getElementById('rrSidebar'),sidebarShade=document.getElementById('sidebarShade');
