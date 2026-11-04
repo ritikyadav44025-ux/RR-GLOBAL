@@ -15,7 +15,7 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024, files: 3, fields: 2, fieldSize: 20 * 1024 },
   fileFilter: (_req, file, cb) => {
     const name = (file.originalname || "").toLowerCase();
-    const allowedImage = ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype) && /\\.(jpg|jpeg|png|webp)$/.test(name);
+    const allowedImage = ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype) && /\.(jpg|jpeg|png|webp)$/.test(name);
     const allowedPdf = file.mimetype === "application/pdf" && name.endsWith(".pdf");
     if (allowedImage || allowedPdf) return cb(null, true);
     cb(new Error("Only JPG, PNG, WEBP images and PDF documents are supported."));
