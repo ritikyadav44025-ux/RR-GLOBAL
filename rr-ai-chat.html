@@ -302,6 +302,87 @@ header{background:linear-gradient(180deg,rgba(9,17,31,.96),rgba(7,12,22,.88));bo
 @keyframes rrNeonFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.012)}}
 @keyframes rrNeonPulse{0%,100%{filter:brightness(1);transform:scale(1)}50%{filter:brightness(1.22);transform:scale(1.025)}}
 @media(max-width:560px){.rr-voice-orb{width:min(62vw,410px);height:min(62vw,410px)}}
+
+/* Reference-match pass: RR AI Voice mobile screen */
+.rr-voice-screen{
+  background:
+    radial-gradient(ellipse at 50% 48%,rgba(0,105,255,.20),transparent 40%),
+    radial-gradient(ellipse at 50% 64%,rgba(145,20,255,.17),transparent 48%),
+    radial-gradient(ellipse at 0% 42%,rgba(0,112,255,.18),transparent 26%),
+    radial-gradient(ellipse at 100% 48%,rgba(132,0,255,.19),transparent 27%),
+    #020307;
+}
+.rr-voice-top{min-height:70px}
+.rr-voice-iconbtn{width:58px;height:58px;background:linear-gradient(145deg,#202533,#111722);border-color:#343b4d;font-size:25px}
+.rr-voice-brand{gap:12px}
+.rr-voice-brand:before{width:54px;height:54px;flex-basis:54px;border-color:rgba(205,224,255,.72);background:#05070d url("rr-global-header-logo.png") center/contain no-repeat;box-shadow:0 0 18px rgba(0,132,255,.22)}
+.rr-voice-brand span{font-size:17px;line-height:1.18}
+.rr-voice-brand small{font-size:13px}
+.rr-voice-state{top:calc(18px + env(safe-area-inset-top));margin-top:72px;padding:7px 13px;font-size:10px}
+.rr-voice-orb-wrap{top:45%;width:min(76vw,410px);height:min(76vw,410px)}
+.rr-voice-orb{
+ width:100%;height:100%;border-radius:50%;overflow:visible;
+ background:
+  radial-gradient(ellipse at 22% 86%,rgba(0,190,255,.32),transparent 34%),
+  radial-gradient(ellipse at 78% 86%,rgba(188,30,255,.30),transparent 35%),
+  radial-gradient(circle at 50% 45%,#07152c 0%,#030918 57%,#01040b 78%);
+ border:0;
+ box-shadow:0 0 25px rgba(0,177,255,.48),0 0 72px rgba(0,107,255,.42),0 0 118px rgba(144,34,255,.24),inset 0 -24px 55px rgba(0,112,255,.16);
+ animation:rrNeonFloat 5s ease-in-out infinite;
+}
+.rr-voice-orb:before{
+ content:"RR";inset:0;display:grid;place-items:center;
+ font-size:clamp(76px,20vw,118px);font-weight:950;font-style:italic;
+ letter-spacing:-.15em;padding-right:.15em;color:#f7fbff;
+ background:none;filter:none;
+ text-shadow:0 0 8px #fff,0 0 20px #11baff,0 0 42px #176dff;
+}
+.rr-voice-orb:after{
+ inset:-3px;padding:3px;border-radius:50%;
+ background:conic-gradient(from 205deg,#00e5ff 0deg,#137aff 100deg,#a42dff 205deg,#f04cff 270deg,#00cfff 360deg);
+ filter:drop-shadow(0 0 9px #08aaff) drop-shadow(0 0 23px rgba(153,37,255,.9));
+}
+.rr-voice-orb.listening{animation:rrNeonPulse 1.8s ease-in-out infinite}
+.rr-voice-caption{
+ top:calc(100% + 43px);font-size:clamp(21px,5vw,28px);
+ line-height:1.25;font-weight:750;color:#f7f9ff;
+ text-shadow:0 0 18px rgba(0,135,255,.24);
+}
+.rr-voice-caption:after{
+ content:"मैं आपकी बात सुन रहा हूँ…";display:block;margin-top:9px;
+ color:#c4c9d6;font-size:clamp(15px,3.7vw,20px);font-weight:450;
+ text-shadow:none;white-space:nowrap;
+}
+.rr-voice-orb-wrap:after{
+ top:calc(100% + 126px);width:174px;height:34px;
+ background:repeating-linear-gradient(90deg,#08baff 0 5px,transparent 5px 14px);
+ filter:drop-shadow(0 0 8px #008cff);
+}
+.rr-voice-bottom{max-width:760px;gap:12px}
+.rr-voice-input{min-height:62px;padding:18px 24px;font-size:17px;background:linear-gradient(120deg,rgba(27,33,49,.96),rgba(22,26,39,.96));border-color:rgba(190,205,232,.42)}
+.rr-voice-attach{width:58px;height:58px;font-size:34px}
+.rr-voice-mute,.rr-voice-end{width:64px;height:64px}
+@media(max-width:560px){
+ .rr-voice-screen{padding-left:20px;padding-right:20px}
+ .rr-voice-iconbtn{width:54px;height:54px}
+ .rr-voice-brand:before{width:50px;height:50px;flex-basis:50px}
+ .rr-voice-brand span{font-size:15px}
+ .rr-voice-brand small{font-size:12px}
+ .rr-voice-orb-wrap{top:45%;width:min(76vw,410px);height:min(76vw,410px)}
+ .rr-voice-caption{top:calc(100% + 34px);font-size:23px}
+ .rr-voice-caption:after{margin-top:8px;font-size:16px}
+ .rr-voice-orb-wrap:after{top:calc(100% + 112px);width:158px;height:32px}
+ .rr-voice-bottom{gap:8px}
+ .rr-voice-attach{width:48px;height:48px;font-size:30px}
+ .rr-voice-input{min-height:54px;padding:15px 16px;font-size:15px}
+ .rr-voice-mute,.rr-voice-end{width:56px;height:56px}
+}
+@media(max-height:720px){
+ .rr-voice-orb-wrap{top:43%;width:min(66vw,330px);height:min(66vw,330px)}
+ .rr-voice-caption{top:calc(100% + 25px)}
+ .rr-voice-orb-wrap:after{top:calc(100% + 100px)}
+}
+
 </style></head>
 <body>
 <div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><button class="sidebar-search" type="button" id="sidebarSearch">⌕　Search chats</button><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
