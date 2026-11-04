@@ -1,0 +1,26 @@
+{
+  "id": "./rr-ai-chat.html",
+  "name": "RR AI by RR GLOBAL",
+  "short_name": "RR AI",
+  "description": "Your AI assistant from RR GLOBAL",
+  "start_url": "./rr-ai-chat.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080d16",
+  "theme_color": "#080d16",
+  "icons": [
+    {
+      "src": "./rr-global-header-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./rr-global-header-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
