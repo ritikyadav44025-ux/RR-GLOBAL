@@ -779,7 +779,7 @@ const CHAT_STORE_KEY="rr_ai_conversations_v1";
 let chatConversations=[];
 let activeConversationId=null;
 function cleanMessages(items){return Array.isArray(items)?items.filter(m=>m&&["user","assistant"].includes(m.role)&&typeof m.content==="string").slice(-100):[];}
-function makeChatTitle(items){const first=items.find(m=>m.role==="user");return first?first.content.replace(/\\s+/g," ").replace(/📎.*/,"").trim().slice(0,48)||"New conversation":"New conversation";}
+function makeChatTitle(items){const first=items.find(m=>m.role==="user");return first?first.content.replace(/\s+/g," ").replace(/📎.*/,"").trim().slice(0,48)||"New conversation":"New conversation";}
 function persistChatStore(){
   try{localStorage.setItem(CHAT_STORE_KEY,JSON.stringify(chatConversations.slice(-50)));}
   catch(_){voiceHint.textContent="Chat history could not be saved. Device storage may be full.";}
@@ -1013,7 +1013,7 @@ function speakRRReply(text,isCall){
     .replace(/[★☆✦✧⭐✨]+/g,'')
     .replace(/[ \\t]+/g,' ')
     .replace(/\\n{2,}/g,'. ')
-    .replace(/\\s+/g,' ')
+    .replace(/\s+/g,' ')
     .trim();
   const selected=rrChooseVoice(cleanText);
   const lang=selected.lang;
