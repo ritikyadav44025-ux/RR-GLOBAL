@@ -169,6 +169,50 @@ main{padding:28px 0 24px}
 @keyframes rrOrbPulse{0%,100%{box-shadow:0 0 55px rgba(113,192,224,.17),inset -24px -24px 50px rgba(0,0,0,.48)}50%{box-shadow:0 0 95px rgba(113,192,224,.35),inset -24px -24px 50px rgba(0,0,0,.4)}}
 @media(max-width:560px){.rr-voice-screen{padding-left:18px;padding-right:18px}.rr-voice-iconbtn{width:50px;height:50px}.rr-voice-orb{width:58vw;height:58vw}.rr-voice-bottom{gap:9px}.rr-voice-input{padding:15px 16px;font-size:14px}.rr-voice-mute,.rr-voice-end{width:56px;height:56px}}
 @media(prefers-reduced-motion:reduce){.rr-voice-orb,.rr-voice-orb.listening{animation:none}}
+
+/* RR GLOBAL signature voice orb — animated brand palette */
+.rr-voice-screen{
+ background:
+  radial-gradient(ellipse at 50% 48%,rgba(0,115,255,.17),transparent 35%),
+  radial-gradient(ellipse at 50% 55%,rgba(116,0,255,.12),transparent 46%),
+  linear-gradient(180deg,#03050b 0%,#050914 48%,#020409 100%);
+ overflow:hidden;
+}
+.rr-voice-screen:before,.rr-voice-screen:after{content:"";position:absolute;pointer-events:none;border-radius:50%;filter:blur(48px);opacity:.32;animation:rrAmbient 7s ease-in-out infinite alternate}
+.rr-voice-screen:before{width:48vw;height:48vw;max-width:340px;max-height:340px;left:-18%;top:28%;background:#006eff}
+.rr-voice-screen:after{width:42vw;height:42vw;max-width:300px;max-height:300px;right:-15%;top:38%;background:#7a18ff;animation-delay:-3.5s}
+.rr-voice-top,.rr-voice-state,.rr-voice-orb-wrap,.rr-voice-bottom{z-index:1}
+.rr-voice-top{min-height:66px}
+.rr-voice-brand{display:flex;align-items:center;gap:10px;font-size:17px;letter-spacing:.035em}
+.rr-voice-brand:before{content:"RR";display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:1px solid rgba(125,190,255,.65);background:linear-gradient(145deg,#132746,#070d1a);box-shadow:0 0 20px rgba(0,145,255,.24);font-size:20px;font-weight:900;font-style:italic;letter-spacing:-.12em}
+.rr-voice-brand span{display:block;color:#aebbd0;font-size:12px;font-weight:500;letter-spacing:.04em}
+.rr-voice-state{top:calc(18px + env(safe-area-inset-top));margin-top:62px;background:rgba(8,27,48,.75);border:1px solid rgba(91,189,255,.22);color:#8feaff;box-shadow:0 0 22px rgba(0,132,255,.1);letter-spacing:.08em}
+.rr-voice-orb-wrap{top:48%;width:min(74vw,390px);height:min(74vw,390px)}
+.rr-voice-orb{position:relative;width:100%;height:100%;border-radius:50%;isolation:isolate;background:radial-gradient(circle at 50% 45%,#0b1830 0%,#071021 47%,#030712 70%);border:2px solid transparent;box-shadow:0 0 32px rgba(0,144,255,.38),0 0 82px rgba(0,103,255,.2),inset 0 0 45px rgba(0,87,255,.15);animation:rrOrbFloat 5s ease-in-out infinite}
+.rr-voice-orb:before{content:"RR";position:absolute;inset:5px;border-radius:50%;display:grid;place-items:center;font-size:clamp(58px,17vw,100px);font-weight:950;letter-spacing:-.13em;font-style:italic;color:#f4fbff;text-shadow:0 0 14px rgba(107,218,255,.8),0 0 38px rgba(0,122,255,.7);background:radial-gradient(ellipse at 35% 25%,rgba(19,69,130,.36),transparent 48%)}
+.rr-voice-orb:after{content:"";position:absolute;inset:-7px;border-radius:50%;padding:3px;background:conic-gradient(from 0deg,#00d5ff,#1672ff,#a52cff,#e14bff,#2478ff,#00d5ff);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;filter:drop-shadow(0 0 8px #168dff) drop-shadow(0 0 19px rgba(147,38,255,.75));animation:rrRingSpin 5s linear infinite}
+.rr-voice-orb.listening{animation:rrOrbPulse 1.8s ease-in-out infinite}
+.rr-voice-orb.listening:after{animation:rrRingSpin 2.4s linear infinite;filter:drop-shadow(0 0 12px #00cfff) drop-shadow(0 0 26px #902cff)}
+.rr-voice-caption{top:calc(100% + 46px);font-size:15px;font-weight:600;letter-spacing:.015em;color:#d8e9ff;text-shadow:0 0 15px rgba(0,144,255,.3)}
+.rr-voice-orb-wrap:after{content:"";position:absolute;top:calc(100% + 94px);left:50%;transform:translateX(-50%);width:120px;height:26px;background:repeating-linear-gradient(90deg,#08baff 0 5px,transparent 5px 15px);clip-path:polygon(0 45%,7% 45%,7% 65%,14% 65%,14% 22%,21% 22%,21% 78%,28% 78%,28% 0,35% 0,35% 100%,42% 100%,42% 35%,49% 35%,49% 68%,56% 68%,56% 15%,63% 15%,63% 85%,70% 85%,70% 40%,77% 40%,77% 60%,84% 60%,84% 28%,91% 28%,91% 70%,100% 70%,100% 45%);filter:drop-shadow(0 0 7px #008cff);animation:rrEqualizer 1s ease-in-out infinite alternate}
+.rr-voice-bottom{max-width:720px;gap:12px}
+.rr-voice-input{background:rgba(25,31,47,.88);border-color:rgba(190,205,232,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.rr-voice-mute{background:rgba(30,34,48,.92);border-color:rgba(190,205,232,.28)}
+.rr-voice-end{box-shadow:0 5px 24px rgba(0,0,0,.3)}
+@keyframes rrRingSpin{to{transform:rotate(360deg)}}
+@keyframes rrAmbient{from{transform:scale(.82) translateY(-8px);opacity:.2}to{transform:scale(1.18) translateY(14px);opacity:.42}}
+@keyframes rrEqualizer{from{transform:translateX(-50%) scaleY(.55);opacity:.65}to{transform:translateX(-50%) scaleY(1);opacity:1}}
+@keyframes rrOrbPulse{0%,100%{transform:scale(.98);box-shadow:0 0 32px rgba(0,144,255,.4),0 0 82px rgba(0,103,255,.2),inset 0 0 45px rgba(0,87,255,.15)}50%{transform:scale(1.035);box-shadow:0 0 48px rgba(0,210,255,.55),0 0 112px rgba(135,32,255,.34),inset 0 0 62px rgba(0,125,255,.24)}}
+@media(max-width:560px){
+ .rr-voice-screen{padding-left:18px;padding-right:18px}
+ .rr-voice-orb-wrap{top:47%;width:min(72vw,330px);height:min(72vw,330px)}
+ .rr-voice-caption{top:calc(100% + 38px);font-size:14px}
+ .rr-voice-orb-wrap:after{top:calc(100% + 82px)}
+ .rr-voice-bottom{gap:9px}
+ .rr-voice-input{padding:16px 17px;font-size:15px}
+ .rr-voice-mute,.rr-voice-end{width:58px;height:58px}
+}
+@media(prefers-reduced-motion:reduce){.rr-voice-screen:before,.rr-voice-screen:after,.rr-voice-orb,.rr-voice-orb:after,.rr-voice-orb-wrap:after{animation:none}}
 </style></head>
 <body>
 <div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><button class="sidebar-search" type="button" id="sidebarSearch">⌕　Search chats</button><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
@@ -183,7 +227,7 @@ main{padding:28px 0 24px}
 </section>
 <div class="hint" id="voiceHint">RR AI · Secure Groq connection · Voice input uses your browser speech recognition.</div>
 </main>
-<section class="rr-voice-screen" id="rrVoiceScreen" aria-label="RR AI voice chat"><div class="rr-voice-top"><button class="rr-voice-iconbtn" id="rrVoiceMenu" type="button" aria-label="Back to chat">☰</button><div class="rr-voice-brand">RR <span>GLOBAL</span></div><button class="rr-voice-iconbtn" id="rrVoiceSettings" type="button" aria-label="Voice settings">☷</button></div><div class="rr-voice-state" id="rrVoiceState">● RR AI READY</div><div class="rr-voice-orb-wrap"><div class="rr-voice-orb" id="rrVoiceOrb"></div><div class="rr-voice-caption" id="rrVoiceCaption">Speak naturally with RR AI</div></div><div class="rr-voice-bottom"><input class="rr-voice-input" id="rrVoiceText" type="text" placeholder="Message RR AI" aria-label="Message RR AI"><button class="rr-voice-mute" id="rrVoiceMute" type="button" aria-label="Mute microphone">♩̸</button><button class="rr-voice-end" id="rrVoiceEnd" type="button" aria-label="End voice chat">×</button></div></section>
+<section class="rr-voice-screen" id="rrVoiceScreen" aria-label="RR AI voice chat"><div class="rr-voice-top"><button class="rr-voice-iconbtn" id="rrVoiceMenu" type="button" aria-label="Back to chat">☰</button><div class="rr-voice-brand"><span>RR GLOBAL<br><small>RR AI Voice</small></span></div><button class="rr-voice-iconbtn" id="rrVoiceSettings" type="button" aria-label="Voice settings">☷</button></div><div class="rr-voice-state" id="rrVoiceState">● RR AI READY</div><div class="rr-voice-orb-wrap"><div class="rr-voice-orb" id="rrVoiceOrb"></div><div class="rr-voice-caption" id="rrVoiceCaption">Speak naturally with RR AI</div></div><div class="rr-voice-bottom"><input class="rr-voice-input" id="rrVoiceText" type="text" placeholder="Message RR AI" aria-label="Message RR AI"><button class="rr-voice-mute" id="rrVoiceMute" type="button" aria-label="Mute microphone">♩̸</button><button class="rr-voice-end" id="rrVoiceEnd" type="button" aria-label="End voice chat">×</button></div></section>
 <script>
 const API_BASE_URL = "https://rr-global-ai-api.onrender.com"; // Public backend URL only. Never put the AI provider API key in this file.
 
