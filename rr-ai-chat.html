@@ -430,6 +430,51 @@ header{background:linear-gradient(180deg,rgba(9,17,31,.96),rgba(7,12,22,.88));bo
  .rr-voice-orb-wrap:after{top:calc(100% + 96px)}
 }
 
+
+/* Minimal purple RR AI voice orb — no logo or lettering */
+.rr-voice-orb{
+ background:
+  radial-gradient(ellipse at 35% 30%,rgba(108,55,255,.26),transparent 42%),
+  radial-gradient(ellipse at 72% 76%,rgba(174,36,255,.23),transparent 45%),
+  radial-gradient(circle at 50% 48%,#100b28 0%,#090719 58%,#03040b 80%);
+ border:1px solid rgba(153,106,255,.6);
+ box-shadow:0 0 24px rgba(115,68,255,.35),0 0 72px rgba(115,45,255,.27),inset 0 0 48px rgba(120,55,255,.2);
+}
+.rr-voice-orb:before{
+ content:"";inset:0;display:block;border-radius:50%;
+ background:radial-gradient(ellipse at 30% 35%,rgba(128,76,255,.16),transparent 52%);
+ box-shadow:none;text-shadow:none;
+}
+.rr-voice-orb:after{
+ background:conic-gradient(from 210deg,#4d8dff,#8952ff,#d34bff,#8b50ff,#4d8dff);
+ filter:drop-shadow(0 0 9px rgba(133,79,255,.8)) drop-shadow(0 0 22px rgba(115,55,255,.5));
+}
+.rr-voice-energy{
+ background:
+  radial-gradient(ellipse at 28% 0%,rgba(122,82,255,.65),transparent 58%),
+  radial-gradient(ellipse at 75% 0%,rgba(194,64,255,.52),transparent 58%);
+}
+.rr-voice-orb.listening{
+ animation:rrPurpleListen 1.35s ease-in-out infinite;
+}
+.rr-voice-orb.listening:before{
+ animation:rrPurpleGlow 1.35s ease-in-out infinite alternate;
+}
+.rr-voice-orb.listening:after{
+ animation:rrRingSpin 3.2s linear infinite;
+}
+@keyframes rrPurpleListen{
+ 0%,100%{transform:scale(.975);box-shadow:0 0 24px rgba(115,68,255,.35),0 0 72px rgba(115,45,255,.27),inset 0 0 48px rgba(120,55,255,.2)}
+ 50%{transform:scale(1.035);box-shadow:0 0 38px rgba(145,93,255,.62),0 0 105px rgba(169,57,255,.42),inset 0 0 65px rgba(144,75,255,.32)}
+}
+@keyframes rrPurpleGlow{
+ from{opacity:.45;transform:scale(.94)}
+ to{opacity:1;transform:scale(1.05)}
+}
+@media(prefers-reduced-motion:reduce){
+ .rr-voice-orb.listening,.rr-voice-orb.listening:before,.rr-voice-orb.listening:after{animation:none}
+}
+
 </style></head>
 <body>
 <div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><button class="sidebar-search" type="button" id="sidebarSearch">⌕　Search chats</button><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
