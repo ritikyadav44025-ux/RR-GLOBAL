@@ -285,7 +285,7 @@ header{background:linear-gradient(180deg,rgba(9,17,31,.96),rgba(7,12,22,.88));bo
 <div class="rr-voice-settings-panel" id="rrVoiceSettingsPanel" hidden role="dialog" aria-label="Voice and language settings">
   <div class="rr-voice-settings-head"><strong>Voice & Language</strong><button type="button" id="rrVoiceSettingsClose" aria-label="Close settings">×</button></div>
   <label for="rrInputLanguage">Speech recognition language</label>
-  <select id="rrInputLanguage"><option value="auto">Auto (Hindi default)</option><option value="hi-IN">Hindi</option><option value="ur-PK">Urdu</option><option value="en-IN">English</option></select>
+  <select id="rrInputLanguage"><option value="auto">Auto (Hindi input fallback)</option><option value="hi-IN">Hindi</option><option value="ur-PK">Urdu</option><option value="en-IN">English</option></select>
   <label for="rrOutputVoice">RR AI speaking voice</label>
   <select id="rrOutputVoice">
     <option value="auto">Auto voice — match reply language</option>
@@ -538,7 +538,7 @@ function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallM
    };
    micButton.addEventListener('click',()=>{
      if(isListening){recognition.stop();return;}
-     try{recognition.start();}catch(_){voiceHint.textContent='Please wait a moment and tap the microphone again.';}
+     try{recognition.lang=rrVoicePreference.inputLanguage==='auto'?'hi-IN':rrVoicePreference.inputLanguage;recognition.start();}catch(_){voiceHint.textContent='Please wait a moment and tap the microphone again.';}
    });
  }
 
