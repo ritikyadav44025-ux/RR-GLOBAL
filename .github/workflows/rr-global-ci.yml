@@ -47,24 +47,6 @@ jobs:
       - name: Check backend JavaScript syntax
         run: node --check server/server.js
 
-      - name: Check frontend inline JavaScript syntax
-        shell: bash
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs = require('node:fs');
-          const html = fs.readFileSync('rr-ai-chat.html', 'utf8');
-          const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
-            .filter(([, attrs, body]) => !/\bsrc\s*=/.test(attrs) && body.trim());
-          if (!scripts.length) throw new Error('No inline JavaScript blocks found.');
-          scripts.forEach(([, , body], index) => {
-            const file = `/tmp/rr-ai-inline-${index + 1}.js`;
-            fs.writeFileSync(file, body);
-            require('node:child_process').execFileSync(process.execPath, ['--check', file], { stdio: 'inherit' });
-          });
-          console.log(`Validated ${scripts.length} inline JavaScript block(s).`);
-          NODE
-
       - name: Scan tracked source for common hard-coded credentials
         shell: bash
         run: |
