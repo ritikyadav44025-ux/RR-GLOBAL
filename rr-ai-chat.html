@@ -388,20 +388,7 @@ async function send(text){
     saveConversation();
     if(fileNames.length){selectedFiles=[];renderAttachments();}
     if((voiceRepliesEnabled||voiceCallActive) && 'speechSynthesis' in window){
-      window.speechSynthesis.cancel();
-      const spoken=new SpeechSynthesisUtterance(answer);
-      spoken.lang=/[\\u0900-\\u097F]/.test(answer)?'hi-IN':'en-IN';
-      spoken.rate=1.04;spoken.pitch=1;spoken.volume=1;
-      const availableVoices=window.speechSynthesis.getVoices();
-      const preferred=availableVoices.find(v=>v.lang.toLowerCase()===spoken.lang.toLowerCase())||availableVoices.find(v=>v.lang.toLowerCase().startsWith(spoken.lang.slice(0,2)));
-      if(preferred)spoken.voice=preferred;
-      if(voiceCallActive){
-        voiceCallSpeaking=true;
-        spoken.onstart=()=>{if(recognition&&isListening)recognition.stop();setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='मैं जवाब दे रहा हूँ… बीच में बोलने के लिए माइक दबाएँ';};
-        spoken.onend=()=>{voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}};
-        spoken.onerror=()=>{voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted)startVoiceCallListening();};
-      }
-      window.speechSynthesis.speak(spoken);
+      speakRRReply(answer,voiceCallActive);
     }
   }catch(error){
     addMessage(error.message || 'Could not reach RR AI. Please try again later.','assistant');
@@ -417,11 +404,41 @@ async function send(text){
  let recognition=null;
  let isListening=false;
  let voiceCallTranscript='';
- function setVoiceScreenState(label,listening=false){const state=document.getElementById('rrVoiceState'),caption=document.getElementById('rrVoiceCaption'),orb=document.getElementById('rrVoiceOrb');if(state)state.textContent=label;if(caption)caption.textContent=listening?'Listening… बोलिए':label.replace('● ','');if(orb)orb.classList.toggle('listening',listening);}
+ let rrSpeechRunId=0;
+function speakRRReply(text,isCall){
+  if(!('speechSynthesis' in window))return;
+  const synth=window.speechSynthesis;
+  synth.cancel();
+  const runId=++rrSpeechRunId;
+  const lang=/[\\u0900-\\u097F]/.test(text)?'hi-IN':'en-IN';
+  const voices=synth.getVoices();
+  const voice=voices.find(v=>v.lang.toLowerCase()===lang.toLowerCase())||voices.find(v=>v.lang.toLowerCase().startsWith(lang.slice(0,2)));
+  const parts=String(text).replace(/\\s+/g,' ').match(/[^.!?।]+[.!?।]?/g)||[String(text)];
+  const chunks=[];let buffer='';
+  parts.forEach(part=>{const next=(buffer+' '+part).trim();if(next.length>170&&buffer){chunks.push(buffer.trim());buffer=part.trim();}else buffer=next;});
+  if(buffer.trim())chunks.push(buffer.trim());
+  if(isCall){voiceCallSpeaking=true;if(recognition&&isListening)recognition.stop();setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='RR AI जवाब दे रहा है…';}
+  let index=0;
+  const speakNext=()=>{
+    if(runId!==rrSpeechRunId|| (isCall&&!voiceCallActive))return;
+    if(index>=chunks.length){
+      if(isCall){voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}}
+      return;
+    }
+    const utterance=new SpeechSynthesisUtterance(chunks[index++]);
+    utterance.lang=lang;utterance.rate=0.94;utterance.pitch=1;utterance.volume=1;
+    if(voice)utterance.voice=voice;
+    utterance.onend=()=>{if(runId===rrSpeechRunId)speakNext();};
+    utterance.onerror=()=>{if(runId===rrSpeechRunId){if(isCall){voiceCallSpeaking=false;setVoiceScreenState('● VOICE PLAYBACK ISSUE');} }};
+    synth.speak(utterance);
+  };
+  speakNext();
+}
+function setVoiceScreenState(label,listening=false){const state=document.getElementById('rrVoiceState'),caption=document.getElementById('rrVoiceCaption'),orb=document.getElementById('rrVoiceOrb');if(state)state.textContent=label;if(caption)caption.textContent=listening?'Listening… बोलिए':label.replace('● ','');if(orb)orb.classList.toggle('listening',listening);}
 function openRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.add('open');document.body.style.overflow='hidden';setVoiceScreenState('● RR AI LISTENING',true);}
 function closeRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.remove('open');document.body.style.overflow='';}
 function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallMuted||isListening)return;try{recognition.lang=voiceCallLanguage;recognition.continuous=voiceCallActive;recognition.interimResults=true;recognition.start();setVoiceScreenState('● RR AI LISTENING',true);}catch(_){}}
- function stopVoiceCall(){voiceCallActive=false;voiceCallSpeaking=false;voiceCallMuted=false;if(recognition&&isListening)recognition.stop();if('speechSynthesis' in window)window.speechSynthesis.cancel();voiceModeButton.classList.remove('active');voiceModeButton.setAttribute('aria-pressed','false');voiceModeButton.classList.remove('voice-call-active');document.getElementById('rrVoiceMute').classList.remove('muted');document.getElementById('rrVoiceMute').textContent='♩̸';closeRRVoiceScreen();voiceHint.textContent='Voice call ended.';}
+ function stopVoiceCall(){voiceCallActive=false;voiceCallSpeaking=false;voiceCallMuted=false;rrSpeechRunId++;if(recognition&&isListening)recognition.stop();if('speechSynthesis' in window)window.speechSynthesis.cancel();voiceModeButton.classList.remove('active');voiceModeButton.setAttribute('aria-pressed','false');voiceModeButton.classList.remove('voice-call-active');document.getElementById('rrVoiceMute').classList.remove('muted');document.getElementById('rrVoiceMute').textContent='♩̸';closeRRVoiceScreen();voiceHint.textContent='Voice call ended.';}
  if(!SpeechRecognition){
    micButton.addEventListener('click',()=>{voiceHint.textContent='Voice input is not supported in this browser. Try the latest Chrome browser.';});
  }else{
@@ -457,7 +474,7 @@ function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallM
    };
    recognition.onend=()=>{
      isListening=false;micButton.classList.remove('listening');micButton.textContent='🎙️';micButton.setAttribute('aria-label','Start voice input');
-     if(voiceCallActive){if(!voiceCallMuted){if(!voiceCallSpeaking)setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}return;}
+     if(voiceCallActive){if(voiceCallMuted||voiceCallSpeaking)return;setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();return;}
      voiceHint.textContent=input.value.trim()?'Voice captured. Check the text, then tap Send.':'Tap the microphone and speak in Hindi.';
    };
    micButton.addEventListener('click',()=>{
@@ -494,7 +511,7 @@ document.getElementById('rrVoiceMenu').addEventListener('click',stopVoiceCall);
 document.getElementById('rrVoiceMute').addEventListener('click',()=>{
   const b=document.getElementById('rrVoiceMute');
   if(voiceCallSpeaking){
-    if('speechSynthesis' in window)window.speechSynthesis.cancel();
+    rrSpeechRunId++;if('speechSynthesis' in window)window.speechSynthesis.cancel();
     voiceCallSpeaking=false;voiceCallMuted=false;
     b.classList.remove('muted');b.textContent='♩̸';b.setAttribute('aria-label','Mute microphone');
     setVoiceScreenState('● RR AI LISTENING',true);
