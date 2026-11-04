@@ -213,6 +213,25 @@ main{padding:28px 0 24px}
  .rr-voice-mute,.rr-voice-end{width:58px;height:58px}
 }
 @media(prefers-reduced-motion:reduce){.rr-voice-screen:before,.rr-voice-screen:after,.rr-voice-orb,.rr-voice-orb:after,.rr-voice-orb-wrap:after{animation:none}}
+
+/* RR AI voice experience — polished branded presentation */
+.rr-voice-screen{background:radial-gradient(ellipse at 50% 48%,rgba(0,106,255,.19),transparent 38%),radial-gradient(ellipse at 50% 62%,rgba(139,25,255,.15),transparent 50%),#03050a}
+.rr-voice-top{justify-content:space-between;min-height:66px}
+.rr-voice-brand{position:absolute;left:50%;top:calc(18px + env(safe-area-inset-top));transform:translateX(-50%);display:flex;align-items:center;gap:11px;font-size:18px;letter-spacing:0}
+.rr-voice-brand:before{content:"RR";width:48px;height:48px;border:1.5px solid #67caff;border-radius:50%;display:grid;place-items:center;background:#08152a;color:#fff;font-size:21px;font-weight:950;font-style:italic;letter-spacing:-.12em;box-shadow:0 0 22px #087bff66}
+.rr-voice-brand span{color:#f7f9ff;font-size:16px;font-weight:750;line-height:1.25}
+.rr-voice-brand small{color:#aab8d1;font-size:12px;font-weight:500}
+.rr-voice-state{margin-top:68px}
+.rr-voice-orb-wrap{top:47%;width:min(76vw,390px);height:min(76vw,390px)}
+.rr-voice-orb{width:100%;height:100%;background:radial-gradient(circle at 50% 48%,#03091a 0%,#050d20 58%,#02050c 76%);border:0;box-shadow:0 0 36px #007bff88,0 0 100px #164fff40,inset 0 0 45px #006eff22}
+.rr-voice-orb:before{inset:7px;font-size:clamp(68px,19vw,108px);letter-spacing:-.15em;background:radial-gradient(ellipse at 35% 25%,#163e76aa,transparent 48%);text-shadow:0 0 16px #00baff,0 0 38px #246bff}
+.rr-voice-orb:after{inset:-8px;padding:3px;background:conic-gradient(#00dfff,#277aff,#9e37ff,#ec5bff,#247bff,#00dfff);filter:drop-shadow(0 0 10px #168dff) drop-shadow(0 0 22px #9326ff)}
+.rr-voice-caption{top:calc(100% + 42px);font-size:17px;font-weight:700;color:#f1f6ff}
+.rr-voice-orb-wrap:after{top:calc(100% + 91px);height:30px;width:142px}
+.rr-voice-bottom{max-width:720px}
+.rr-voice-input{font-size:16px;padding:18px 22px;background:linear-gradient(120deg,#1a2030,#171a25);border-color:#535b70}
+.rr-voice-mute,.rr-voice-end{width:62px;height:62px}
+@media(max-width:560px){.rr-voice-orb-wrap{top:46%;width:min(76vw,350px);height:min(76vw,350px)}.rr-voice-caption{top:calc(100% + 35px);font-size:16px}.rr-voice-orb-wrap:after{top:calc(100% + 79px)}.rr-voice-bottom{gap:9px}.rr-voice-input{padding:17px 18px}.rr-voice-mute,.rr-voice-end{width:58px;height:58px}}
 </style></head>
 <body>
 <div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><button class="sidebar-search" type="button" id="sidebarSearch">⌕　Search chats</button><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
@@ -361,7 +380,22 @@ async function send(text){
     conversationHistory.push({role:'assistant',content:answer});
     saveConversation();
     if(fileNames.length){selectedFiles=[];renderAttachments();}
-    if((voiceRepliesEnabled||voiceCallActive) && 'speechSynthesis' in window){window.speechSynthesis.cancel();const spoken=new SpeechSynthesisUtterance(answer);spoken.lang=/[\\u0900-\\u097F]/.test(answer)?'hi-IN':'en-IN';if(voiceCallActive){voiceCallSpeaking=true;spoken.onstart=()=>setVoiceScreenState('● RR AI SPEAKING');spoken.onend=()=>{voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}};spoken.onerror=()=>{voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted)startVoiceCallListening();};}window.speechSynthesis.speak(spoken);}
+    if((voiceRepliesEnabled||voiceCallActive) && 'speechSynthesis' in window){
+      window.speechSynthesis.cancel();
+      const spoken=new SpeechSynthesisUtterance(answer);
+      spoken.lang=/[\\u0900-\\u097F]/.test(answer)?'hi-IN':'en-IN';
+      spoken.rate=1.04;spoken.pitch=1;spoken.volume=1;
+      const availableVoices=window.speechSynthesis.getVoices();
+      const preferred=availableVoices.find(v=>v.lang.toLowerCase()===spoken.lang.toLowerCase())||availableVoices.find(v=>v.lang.toLowerCase().startsWith(spoken.lang.slice(0,2)));
+      if(preferred)spoken.voice=preferred;
+      if(voiceCallActive){
+        voiceCallSpeaking=true;
+        spoken.onstart=()=>{setVoiceScreenState('● RR AI SPEAKING');startVoiceCallListening();};
+        spoken.onend=()=>{voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}};
+        spoken.onerror=()=>{voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted)startVoiceCallListening();};
+      }
+      window.speechSynthesis.speak(spoken);
+    }
   }catch(error){
     addMessage(error.message || 'Could not reach RR AI. Please try again later.','assistant');
   }finally{
@@ -379,7 +413,7 @@ async function send(text){
  function setVoiceScreenState(label,listening=false){const state=document.getElementById('rrVoiceState'),caption=document.getElementById('rrVoiceCaption'),orb=document.getElementById('rrVoiceOrb');if(state)state.textContent=label;if(caption)caption.textContent=listening?'Listening… बोलिए':label.replace('● ','');if(orb)orb.classList.toggle('listening',listening);}
 function openRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.add('open');document.body.style.overflow='hidden';setVoiceScreenState('● RR AI LISTENING',true);}
 function closeRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.remove('open');document.body.style.overflow='';}
-function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallSpeaking||voiceCallMuted||isListening)return;try{recognition.lang=voiceCallLanguage;recognition.continuous=false;recognition.interimResults=true;recognition.start();setVoiceScreenState('● RR AI LISTENING',true);}catch(_){}}
+function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallSpeaking||voiceCallMuted||isListening)return;try{recognition.lang=voiceCallLanguage;recognition.continuous=voiceCallActive;recognition.interimResults=true;recognition.start();setVoiceScreenState('● RR AI LISTENING',true);}catch(_){}}
  function stopVoiceCall(){voiceCallActive=false;voiceCallSpeaking=false;voiceCallMuted=false;if(recognition&&isListening)recognition.stop();if('speechSynthesis' in window)window.speechSynthesis.cancel();voiceModeButton.classList.remove('active');voiceModeButton.setAttribute('aria-pressed','false');voiceModeButton.classList.remove('voice-call-active');document.getElementById('rrVoiceMute').classList.remove('muted');document.getElementById('rrVoiceMute').textContent='♩̸';closeRRVoiceScreen();voiceHint.textContent='Voice call ended.';}
  if(!SpeechRecognition){
    micButton.addEventListener('click',()=>{voiceHint.textContent='Voice input is not supported in this browser. Try the latest Chrome browser.';});
@@ -398,7 +432,14 @@ function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallS
      for(let i=event.resultIndex;i<event.results.length;i++){transcript+=event.results[i][0].transcript;if(event.results[i].isFinal)finalTranscript+=event.results[i][0].transcript;}
      if(voiceCallActive){
        if(transcript){const caption=document.getElementById('rrVoiceCaption');if(caption)caption.textContent=transcript;}
-       if(finalTranscript.trim()&&!voiceCallMuted&&!voiceCallSpeaking){input.value=finalTranscript.trim();recognition.stop();send(finalTranscript.trim());}
+       if(finalTranscript.trim()&&!voiceCallMuted){
+         const interruption=finalTranscript.trim();
+         if(voiceCallSpeaking&&'speechSynthesis' in window){window.speechSynthesis.cancel();voiceCallSpeaking=false;}
+         input.value=interruption;
+         if(recognition&&isListening)recognition.stop();
+         setVoiceScreenState('● RR AI THINKING');
+         send(interruption);
+       }
      }else if(transcript)input.value=transcript;
    };
    recognition.onerror=(event)=>{
