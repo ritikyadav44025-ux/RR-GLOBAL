@@ -397,7 +397,7 @@ async function send(text){
       if(preferred)spoken.voice=preferred;
       if(voiceCallActive){
         voiceCallSpeaking=true;
-        spoken.onstart=()=>{setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='मैं जवाब दे रहा हूँ… बीच में बोल सकते हैं';startVoiceCallListening();};
+        spoken.onstart=()=>{if(recognition&&isListening)recognition.stop();setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='मैं जवाब दे रहा हूँ… बीच में बोलने के लिए माइक दबाएँ';};
         spoken.onend=()=>{voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}};
         spoken.onerror=()=>{voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted)startVoiceCallListening();};
       }
@@ -408,7 +408,7 @@ async function send(text){
   }finally{
     sendButton.disabled=false;
     sendButton.textContent='↑';
-    input.focus();
+    if(!voiceCallActive)input.focus();else{input.blur();document.getElementById('rrVoiceText').blur();}
   }
 }
 
@@ -492,7 +492,17 @@ voiceModeButton.addEventListener('click',e=>{if(input.value.trim()||selectedFile
 document.getElementById('rrVoiceEnd').addEventListener('click',stopVoiceCall);
 document.getElementById('rrVoiceMenu').addEventListener('click',stopVoiceCall);
 document.getElementById('rrVoiceMute').addEventListener('click',()=>{
-  voiceCallMuted=!voiceCallMuted;const b=document.getElementById('rrVoiceMute');b.classList.toggle('muted',voiceCallMuted);b.textContent=voiceCallMuted?'🎙':'♩̸';b.setAttribute('aria-label',voiceCallMuted?'Unmute microphone':'Mute microphone');
+  const b=document.getElementById('rrVoiceMute');
+  if(voiceCallSpeaking){
+    if('speechSynthesis' in window)window.speechSynthesis.cancel();
+    voiceCallSpeaking=false;voiceCallMuted=false;
+    b.classList.remove('muted');b.textContent='♩̸';b.setAttribute('aria-label','Mute microphone');
+    setVoiceScreenState('● RR AI LISTENING',true);
+    startVoiceCallListening();
+    return;
+  }
+  voiceCallMuted=!voiceCallMuted;b.classList.toggle('muted',voiceCallMuted);
+  b.textContent=voiceCallMuted?'🎙':'♩̸';b.setAttribute('aria-label',voiceCallMuted?'Unmute microphone':'Mute microphone');
   if(voiceCallMuted){if(recognition&&isListening)recognition.stop();setVoiceScreenState('● MICROPHONE MUTED');}
   else{setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}
 });
