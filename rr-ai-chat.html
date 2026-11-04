@@ -753,6 +753,7 @@ refreshSidebarRecents();
 let voiceRepliesEnabled=false;
 let voiceCallActive=false;
 let voiceCallSpeaking=false;
+let voiceCallThinking=false;
 let voiceCallMuted=false;
 let voiceCallLanguage='hi-IN';
 const rrVoicePreferenceKey='rr_ai_voice_preferences_v1';
@@ -878,7 +879,13 @@ async function send(text){
   }finally{
     sendButton.disabled=false;
     sendButton.textContent='↑';
-    if(!voiceCallActive)input.focus();else{input.blur();document.getElementById('rrVoiceText').blur();}
+    if(!voiceCallActive)input.focus();else{
+      input.blur();document.getElementById('rrVoiceText').blur();
+      if(voiceCallThinking&&!voiceCallSpeaking){
+        voiceCallThinking=false;
+        if(!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}
+      }
+    }
   }
 }
 
@@ -897,19 +904,19 @@ function speakRRReply(text,isCall){
   const selected=rrChooseVoice(cleanText);
   const lang=selected.lang;
   const voice=selected.voice;
-  if(isCall){voiceCallSpeaking=true;setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='जवाब सुनें — बीच में बोलें, RR AI रुककर सुनेगा';if(!isListening&&!voiceCallMuted)startVoiceCallListening();}
+  if(isCall){voiceCallSpeaking=true;setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='RR AI जवाब दे रहा है…';}
   const utterance=new SpeechSynthesisUtterance(cleanText);
   utterance.lang=lang;utterance.rate=0.97;utterance.pitch=1;utterance.volume=1;
   if(voice)utterance.voice=voice;
-  utterance.onend=()=>{if(runId!==rrSpeechRunId)return;if(isCall){voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}}};
-  utterance.onerror=()=>{if(runId!==rrSpeechRunId)return;if(isCall){voiceCallSpeaking=false;setVoiceScreenState('● VOICE PLAYBACK ISSUE');}};
+  utterance.onend=()=>{if(runId!==rrSpeechRunId)return;if(isCall){voiceCallSpeaking=false;voiceCallThinking=false;if(voiceCallActive&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}}};
+  utterance.onerror=()=>{if(runId!==rrSpeechRunId)return;if(isCall){voiceCallSpeaking=false;voiceCallThinking=false;if(voiceCallActive&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}else setVoiceScreenState('● VOICE PLAYBACK ISSUE');}};
   synth.speak(utterance);
 }
 function setVoiceScreenState(label,listening=false){const state=document.getElementById('rrVoiceState'),caption=document.getElementById('rrVoiceCaption'),orb=document.getElementById('rrVoiceOrb');if(state)state.textContent=label;if(caption)caption.textContent=listening?'Listening...':(label.includes('SPEAKING')?'Speaking...':label.replace('● ',''));if(orb)orb.classList.toggle('listening',listening);}
 function openRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.add('open');document.body.style.overflow='hidden';setVoiceScreenState('● RR AI LISTENING',true);}
 function closeRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.remove('open');document.body.style.overflow='';}
-function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallMuted||isListening)return;try{recognition.lang=voiceCallLanguage;recognition.continuous=voiceCallActive;recognition.interimResults=true;recognition.start();setVoiceScreenState('● RR AI LISTENING',true);}catch(_){}}
- function stopVoiceCall(){voiceCallActive=false;voiceCallSpeaking=false;voiceCallMuted=false;rrSpeechRunId++;if(recognition&&isListening)recognition.stop();if('speechSynthesis' in window)window.speechSynthesis.cancel();voiceModeButton.classList.remove('active');voiceModeButton.setAttribute('aria-pressed','false');voiceModeButton.classList.remove('voice-call-active');document.getElementById('rrVoiceMute').classList.remove('muted');document.getElementById('rrVoiceMute').textContent='♩̸';closeRRVoiceScreen();voiceHint.textContent='Voice call ended.';}
+function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallMuted||voiceCallSpeaking||voiceCallThinking||isListening)return;try{recognition.lang=voiceCallLanguage;recognition.continuous=false;recognition.interimResults=true;recognition.start();setVoiceScreenState('● RR AI LISTENING',true);}catch(_){}}
+ function stopVoiceCall(){voiceCallActive=false;voiceCallSpeaking=false;voiceCallThinking=false;voiceCallMuted=false;rrSpeechRunId++;if(recognition&&isListening)recognition.stop();if('speechSynthesis' in window)window.speechSynthesis.cancel();voiceModeButton.classList.remove('active');voiceModeButton.setAttribute('aria-pressed','false');voiceModeButton.classList.remove('voice-call-active');document.getElementById('rrVoiceMute').classList.remove('muted');document.getElementById('rrVoiceMute').textContent='♩̸';closeRRVoiceScreen();voiceHint.textContent='Voice call ended.';}
  if(!SpeechRecognition){
    micButton.addEventListener('click',()=>{voiceHint.textContent='Voice input is not supported in this browser. Try the latest Chrome browser.';});
  }else{
@@ -926,17 +933,17 @@ function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallM
      let transcript='',finalTranscript='';
      for(let i=event.resultIndex;i<event.results.length;i++){transcript+=event.results[i][0].transcript;if(event.results[i].isFinal)finalTranscript+=event.results[i][0].transcript;}
      if(voiceCallActive){
-       if(transcript){
-         const caption=document.getElementById('rrVoiceCaption');if(caption)caption.textContent=transcript;
-         // Barge-in: keep recognition active during TTS and stop playback as soon as the user starts speaking.
-         if(voiceCallSpeaking&&'speechSynthesis' in window){rrSpeechRunId++;window.speechSynthesis.cancel();voiceCallSpeaking=false;setVoiceScreenState('● RR AI LISTENING',true);}
+       if(transcript&&!finalTranscript.trim()){
+         const caption=document.getElementById('rrVoiceCaption');
+         if(caption)caption.textContent=transcript;
        }
-       if(finalTranscript.trim()&&!voiceCallMuted){
-         const interruption=finalTranscript.trim();
-         input.value=interruption;
-         if(recognition&&isListening)recognition.stop();
+       if(finalTranscript.trim()&&!voiceCallMuted&&!voiceCallThinking){
+         const spokenText=finalTranscript.trim();
+         voiceCallThinking=true;
+         input.value=spokenText;
          setVoiceScreenState('● RR AI THINKING');
-         send(interruption);
+         if(recognition&&isListening)recognition.stop();
+         send(spokenText);
        }
      }else if(transcript)input.value=transcript;
    };
@@ -948,7 +955,7 @@ function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallM
    };
    recognition.onend=()=>{
      isListening=false;micButton.classList.remove('listening');micButton.textContent='🎙️';micButton.setAttribute('aria-label','Start voice input');
-     if(voiceCallActive){if(voiceCallMuted||voiceCallSpeaking)return;setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();return;}
+     if(voiceCallActive){if(voiceCallMuted||voiceCallSpeaking||voiceCallThinking)return;setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();return;}
      voiceHint.textContent=input.value.trim()?'Voice captured. Check the text, then tap Send.':'Tap the microphone and speak in Hindi.';
    };
    micButton.addEventListener('click',()=>{
