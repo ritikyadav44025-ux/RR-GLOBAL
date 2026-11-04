@@ -1028,9 +1028,9 @@ function speakRRReply(text,isCall){
 }
 function setVoiceScreenState(label,listening=false){const state=document.getElementById('rrVoiceState'),caption=document.getElementById('rrVoiceCaption'),orb=document.getElementById('rrVoiceOrb');if(state)state.textContent=label;if(caption)caption.textContent=listening?'Listening...':(label.includes('SPEAKING')?'Speaking...':label.replace('● ',''));if(orb)orb.classList.toggle('listening',listening);}
 function openRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.add('open');document.body.style.overflow='hidden';setVoiceScreenState('● RR AI LISTENING',true);}
-function closeRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.remove('open');document.body.style.overflow='';}
-function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallMuted||voiceCallSpeaking||voiceCallThinking||isListening)return;try{recognition.lang=voiceCallLanguage;recognition.continuous=false;recognition.interimResults=true;recognition.start();setVoiceScreenState('● RR AI LISTENING',true);}catch(err){setVoiceScreenState('● TAP TO RETRY');document.getElementById('rrVoiceCaption').textContent='माइक्रोफ़ोन शुरू नहीं हो पाया। Chrome में साइट खोलकर माइक्रोफ़ोन अनुमति दें और फिर दोबारा कोशिश करें।';}}
- function stopVoiceCall(){voiceCallActive=false;voiceCallSpeaking=false;voiceCallThinking=false;voiceCallMuted=false;rrSpeechRunId++;if(recognition&&isListening)recognition.stop();if('speechSynthesis' in window)window.speechSynthesis.cancel();voiceModeButton.classList.remove('active');voiceModeButton.setAttribute('aria-pressed','false');voiceModeButton.classList.remove('voice-call-active');document.getElementById('rrVoiceMute').classList.remove('muted');document.getElementById('rrVoiceMute').textContent='♩̸';closeRRVoiceScreen();voiceHint.textContent='Voice call ended.';}
+function closeRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.remove('open');document.body.style.overflow='';}\ndocument.getElementById('rrVoiceOrb').addEventListener('click',()=>{if(!voiceCallActive)return;voiceRecognitionNeedsRetry=false;if(recognition&&isListening){try{recognition.stop();}catch(_){}}setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();});
+let voiceRecognitionNeedsRetry=false;\nfunction startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallMuted||voiceCallSpeaking||voiceCallThinking||isListening||voiceRecognitionNeedsRetry)return;try{recognition.lang=voiceCallLanguage;recognition.continuous=false;recognition.interimResults=true;recognition.start();setVoiceScreenState('● RR AI LISTENING',true);}catch(err){voiceRecognitionNeedsRetry=true;setVoiceScreenState('● TAP ORB TO RETRY');document.getElementById('rrVoiceCaption').textContent='माइक्रोफ़ोन शुरू नहीं हो पाया। Orb पर टैप करके फिर कोशिश करें; अनुमति न हो तो Chrome site settings में microphone allow करें।';}}
+ function stopVoiceCall(){voiceRecognitionNeedsRetry=false;voiceCallActive=false;voiceCallSpeaking=false;voiceCallThinking=false;voiceCallMuted=false;rrSpeechRunId++;if(recognition&&isListening)recognition.stop();if('speechSynthesis' in window)window.speechSynthesis.cancel();voiceModeButton.classList.remove('active');voiceModeButton.setAttribute('aria-pressed','false');voiceModeButton.classList.remove('voice-call-active');document.getElementById('rrVoiceMute').classList.remove('muted');document.getElementById('rrVoiceMute').textContent='♩̸';closeRRVoiceScreen();voiceHint.textContent='Voice call ended.';}
  if(!SpeechRecognition){
    micButton.addEventListener('click',()=>{voiceHint.textContent='Voice input is not supported in this browser. Try the latest Chrome browser.';});
  }else{
@@ -1062,14 +1062,25 @@ function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallM
      }else if(transcript)input.value=transcript;
    };
    recognition.onerror=(event)=>{
-     if(voiceCallActive){setVoiceScreenState(event.error==='not-allowed'?'● MICROPHONE PERMISSION NEEDED':'● RECONNECTING');if(event.error==='not-allowed')stopVoiceCall();return;}
+     if(voiceCallActive){
+       const blocked=['not-allowed','service-not-allowed','audio-capture','network'].includes(event.error);
+       voiceRecognitionNeedsRetry=blocked;
+       setVoiceScreenState(blocked?'● TAP ORB TO RETRY':'● RECONNECTING');
+       const caption=document.getElementById('rrVoiceCaption');
+       if(caption)caption.textContent=event.error==='not-allowed'||event.error==='service-not-allowed'
+         ?'माइक्रोफ़ोन अनुमति नहीं मिली। Chrome site settings में microphone allow करें, फिर orb पर टैप करें।'
+         :event.error==='audio-capture'?'माइक्रोफ़ोन उपलब्ध नहीं है। दूसरे ऐप में mic बंद करके orb पर टैप करें।'
+         :event.error==='network'?'Speech service का network connection नहीं मिला। Internet जाँचकर orb पर टैप करें।'
+         :'आवाज़ साफ़ नहीं मिली। फिर बोलें।';
+       return;
+     }
      voiceHint.textContent=event.error==='not-allowed'
        ?'Microphone permission blocked. Allow microphone access in browser settings.'
        :'Voice input error: '+event.error+'. Please try again.';
    };
    recognition.onend=()=>{
      isListening=false;micButton.classList.remove('listening');micButton.textContent='🎙️';micButton.setAttribute('aria-label','Start voice input');
-     if(voiceCallActive){if(voiceCallMuted||voiceCallSpeaking||voiceCallThinking)return;setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();return;}
+     if(voiceCallActive){if(voiceCallMuted||voiceCallSpeaking||voiceCallThinking)return;if(voiceRecognitionNeedsRetry){setVoiceScreenState('● TAP ORB TO RETRY');return;}setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();return;}
      voiceHint.textContent=input.value.trim()?'Voice captured. Check the text, then tap Send.':'Tap the microphone and speak in Hindi.';
    };
    micButton.addEventListener('click',()=>{
@@ -1099,7 +1110,7 @@ function renderAttachments(){
   updateActionButton();
 }
 
-voiceModeButton.addEventListener('click',()=>{if(input.value.trim()||selectedFiles.length){send(input.value);return;}if(voiceCallActive){stopVoiceCall();return;}if(!recognition){voiceHint.textContent='इस ब्राउज़र में Voice Call सपोर्ट नहीं है। RR AI को Chrome में खोलकर कोशिश करें।';return;}if(!window.isSecureContext){voiceHint.textContent='माइक्रोफ़ोन के लिए सुरक्षित HTTPS कनेक्शन ज़रूरी है।';return;}voiceRepliesEnabled=false;voiceCallActive=true;voiceCallMuted=false;voiceModeButton.classList.add('active','voice-call-active');voiceModeButton.setAttribute('aria-pressed','true');openRRVoiceScreen();voiceHint.textContent='RR AI voice chat is active.';document.getElementById('rrVoiceCaption').textContent='माइक्रोफ़ोन चालू हो रहा है…';startVoiceCallListening();});
+voiceModeButton.addEventListener('click',()=>{if(input.value.trim()||selectedFiles.length){send(input.value);return;}if(voiceCallActive){stopVoiceCall();return;}if(!recognition){voiceHint.textContent='इस ब्राउज़र में Voice Call सपोर्ट नहीं है। RR AI को Chrome में खोलकर कोशिश करें।';return;}if(!window.isSecureContext){voiceHint.textContent='माइक्रोफ़ोन के लिए सुरक्षित HTTPS कनेक्शन ज़रूरी है।';return;}voiceRepliesEnabled=false;voiceRecognitionNeedsRetry=false;voiceCallActive=true;voiceCallMuted=false;voiceModeButton.classList.add('active','voice-call-active');voiceModeButton.setAttribute('aria-pressed','true');openRRVoiceScreen();voiceHint.textContent='RR AI voice chat is active.';document.getElementById('rrVoiceCaption').textContent='माइक्रोफ़ोन चालू हो रहा है…';startVoiceCallListening();});
 
 document.getElementById('rrVoiceEnd').addEventListener('click',stopVoiceCall);
 document.getElementById('rrVoiceMenu').addEventListener('click',stopVoiceCall);
