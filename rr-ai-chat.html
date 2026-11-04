@@ -864,7 +864,7 @@ if(rrInputLanguage)rrInputLanguage.value=rrVoicePreference.inputLanguage;
 if(rrOutputVoice)rrOutputVoice.value=rrVoicePreference.outputVoice;
 voiceCallLanguage=rrVoicePreference.inputLanguage==='auto'?'hi-IN':rrVoicePreference.inputLanguage;
 function rrSaveVoicePreferences(){try{localStorage.setItem(rrVoicePreferenceKey,JSON.stringify(rrVoicePreference));}catch(_){}}
-function rrDetectLanguage(text){if(/[\\u0600-\\u06FF]/.test(text))return 'ur-PK';if(/[\\u0900-\\u097F]/.test(text))return 'hi-IN';return 'en-IN';}
+function rrDetectLanguage(text){if(/[\u0600-\u06FF]/.test(text))return 'ur-PK';if(/[\u0900-\u097F]/.test(text))return 'hi-IN';return 'en-IN';}
 function rrChooseVoice(text){
   const voices=window.speechSynthesis?.getVoices?.()||[];
   const pref=rrVoicePreference.outputVoice||'auto';
@@ -872,7 +872,7 @@ function rrChooseVoice(text){
   const [wantedLang,wantedGender]=pref==='auto'?[detected,'auto']:pref.split('|');
   const langMatches=voices.filter(v=>v.lang.toLowerCase().startsWith(wantedLang.slice(0,2).toLowerCase()));
   const genderMatch=langMatches.find(v=>wantedGender!=='auto'&&(wantedGender==='female'?/female|woman|zira|samantha|heera|kalpana|lekha|sara|sadia|rabia/i.test(v.name):/male|man|david|mark|ravi|hemant|daniel/i.test(v.name)));
-  return {voice:genderMatch||langMatches[0]||voices.find(v=>v.lang.toLowerCase().startsWith('en'))||null,lang:wantedLang,genderMatched:!wantedGender||wantedGender==='auto'||!!genderMatch};
+  const chosenVoice=genderMatch||langMatches[0]||voices.find(v=>v.lang.toLowerCase().startsWith('en'))||null;return {voice:chosenVoice,lang:chosenVoice?.lang||wantedLang,genderMatched:!wantedGender||wantedGender==='auto'||!!genderMatch};
 }
 function updateActionButton(){const hasText=!!input.value.trim()||selectedFiles.length>0;voiceModeButton.classList.toggle('send-mode',hasText);voiceModeButton.title=hasText?'Send message':'Voice replies';voiceModeButton.setAttribute('aria-label',hasText?'Send message':'Toggle voice replies');}
 
