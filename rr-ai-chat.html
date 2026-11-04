@@ -413,7 +413,7 @@ async function send(text){
  function setVoiceScreenState(label,listening=false){const state=document.getElementById('rrVoiceState'),caption=document.getElementById('rrVoiceCaption'),orb=document.getElementById('rrVoiceOrb');if(state)state.textContent=label;if(caption)caption.textContent=listening?'Listening… बोलिए':label.replace('● ','');if(orb)orb.classList.toggle('listening',listening);}
 function openRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.add('open');document.body.style.overflow='hidden';setVoiceScreenState('● RR AI LISTENING',true);}
 function closeRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.remove('open');document.body.style.overflow='';}
-function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallSpeaking||voiceCallMuted||isListening)return;try{recognition.lang=voiceCallLanguage;recognition.continuous=voiceCallActive;recognition.interimResults=true;recognition.start();setVoiceScreenState('● RR AI LISTENING',true);}catch(_){}}
+function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallMuted||isListening)return;try{recognition.lang=voiceCallLanguage;recognition.continuous=voiceCallActive;recognition.interimResults=true;recognition.start();setVoiceScreenState('● RR AI LISTENING',true);}catch(_){}}
  function stopVoiceCall(){voiceCallActive=false;voiceCallSpeaking=false;voiceCallMuted=false;if(recognition&&isListening)recognition.stop();if('speechSynthesis' in window)window.speechSynthesis.cancel();voiceModeButton.classList.remove('active');voiceModeButton.setAttribute('aria-pressed','false');voiceModeButton.classList.remove('voice-call-active');document.getElementById('rrVoiceMute').classList.remove('muted');document.getElementById('rrVoiceMute').textContent='♩̸';closeRRVoiceScreen();voiceHint.textContent='Voice call ended.';}
  if(!SpeechRecognition){
    micButton.addEventListener('click',()=>{voiceHint.textContent='Voice input is not supported in this browser. Try the latest Chrome browser.';});
@@ -450,7 +450,7 @@ function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallS
    };
    recognition.onend=()=>{
      isListening=false;micButton.classList.remove('listening');micButton.textContent='🎙️';micButton.setAttribute('aria-label','Start voice input');
-     if(voiceCallActive){if(!voiceCallSpeaking&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}return;}
+     if(voiceCallActive){if(!voiceCallMuted){if(!voiceCallSpeaking)setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}return;}
      voiceHint.textContent=input.value.trim()?'Voice captured. Check the text, then tap Send.':'Tap the microphone and speak in Hindi.';
    };
    micButton.addEventListener('click',()=>{
