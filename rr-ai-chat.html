@@ -475,6 +475,24 @@ header{background:linear-gradient(180deg,rgba(9,17,31,.96),rgba(7,12,22,.88));bo
  .rr-voice-orb.listening,.rr-voice-orb.listening:before,.rr-voice-orb.listening:after{animation:none}
 }
 
+
+/* Hard override: absolutely no RR mark or logo inside the central orb */
+#rrVoiceOrb::before{content:none!important;display:none!important;background:none!important}
+#rrVoiceOrb::after{content:""!important}
+#rrVoiceOrb{
+ background:
+  radial-gradient(ellipse at 32% 28%,rgba(143,100,255,.25),transparent 42%),
+  radial-gradient(ellipse at 72% 75%,rgba(180,60,255,.22),transparent 45%),
+  radial-gradient(circle at 50% 50%,#100b29 0%,#090719 60%,#03040a 82%)!important;
+ border:1px solid rgba(160,120,255,.58)!important;
+ box-shadow:0 0 28px rgba(125,75,255,.38),0 0 82px rgba(122,45,255,.27),inset 0 0 52px rgba(132,75,255,.2)!important;
+}
+#rrVoiceOrb.listening{
+ animation:rrPurpleListen 1.25s ease-in-out infinite!important;
+}
+#rrVoiceOrb.listening::before{display:none!important;content:none!important}
+#rrVoiceOrb.listening::after{animation:rrRingSpin 3.2s linear infinite!important}
+
 </style></head>
 <body>
 <div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><button class="sidebar-search" type="button" id="sidebarSearch">⌕　Search chats</button><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
