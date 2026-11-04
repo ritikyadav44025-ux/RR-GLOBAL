@@ -232,6 +232,15 @@ main{padding:28px 0 24px}
 .rr-voice-input{font-size:16px;padding:18px 22px;background:linear-gradient(120deg,#1a2030,#171a25);border-color:#535b70}
 .rr-voice-mute,.rr-voice-end{width:62px;height:62px}
 @media(max-width:560px){.rr-voice-orb-wrap{top:46%;width:min(76vw,350px);height:min(76vw,350px)}.rr-voice-caption{top:calc(100% + 35px);font-size:16px}.rr-voice-orb-wrap:after{top:calc(100% + 79px)}.rr-voice-bottom{gap:9px}.rr-voice-input{padding:17px 18px}.rr-voice-mute,.rr-voice-end{width:58px;height:58px}}
+
+.rr-voice-attach-wrap{position:relative;flex:0 0 auto}
+.rr-voice-attach{width:48px;height:48px;border-radius:50%;border:1px solid #4e6380;background:linear-gradient(145deg,#182b49,#111827);color:#fff;font-size:30px;line-height:1;display:grid;place-items:center;box-shadow:0 0 18px #147bff33}
+.rr-voice-attach-menu{display:none;position:absolute;bottom:60px;left:0;min-width:155px;padding:7px;background:#171e2b;border:1px solid #35445c;border-radius:15px;box-shadow:0 12px 35px #0009;z-index:30}
+.rr-voice-attach-menu.open{display:grid}
+.rr-voice-attach-menu button{border:0;background:transparent;color:#eef4ff;text-align:left;padding:12px 13px;border-radius:9px;font-size:14px}
+.rr-voice-attach-menu button:active{background:#263a58}
+.rr-voice-input{flex:1}
+@media(max-width:560px){.rr-voice-bottom{gap:8px}.rr-voice-attach{width:46px;height:46px}.rr-voice-mute,.rr-voice-end{width:54px;height:54px}}
 </style></head>
 <body>
 <div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><button class="sidebar-search" type="button" id="sidebarSearch">⌕　Search chats</button><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
@@ -246,7 +255,7 @@ main{padding:28px 0 24px}
 </section>
 <div class="hint" id="voiceHint">RR AI · Secure Groq connection · Voice input uses your browser speech recognition.</div>
 </main>
-<section class="rr-voice-screen" id="rrVoiceScreen" aria-label="RR AI voice chat"><div class="rr-voice-top"><button class="rr-voice-iconbtn" id="rrVoiceMenu" type="button" aria-label="Back to chat">☰</button><div class="rr-voice-brand"><span>RR GLOBAL<br><small>RR AI Voice</small></span></div><button class="rr-voice-iconbtn" id="rrVoiceSettings" type="button" aria-label="Voice settings">☷</button></div><div class="rr-voice-state" id="rrVoiceState">● RR AI READY</div><div class="rr-voice-orb-wrap"><div class="rr-voice-orb" id="rrVoiceOrb"></div><div class="rr-voice-caption" id="rrVoiceCaption">Speak naturally with RR AI</div></div><div class="rr-voice-bottom"><input class="rr-voice-input" id="rrVoiceText" type="text" placeholder="Message RR AI" aria-label="Message RR AI"><button class="rr-voice-mute" id="rrVoiceMute" type="button" aria-label="Mute microphone">♩̸</button><button class="rr-voice-end" id="rrVoiceEnd" type="button" aria-label="End voice chat">×</button></div></section>
+<section class="rr-voice-screen" id="rrVoiceScreen" aria-label="RR AI voice chat"><div class="rr-voice-top"><button class="rr-voice-iconbtn" id="rrVoiceMenu" type="button" aria-label="Back to chat">☰</button><div class="rr-voice-brand"><span>RR GLOBAL<br><small>RR AI Voice</small></span></div><button class="rr-voice-iconbtn" id="rrVoiceSettings" type="button" aria-label="Voice settings">☷</button></div><div class="rr-voice-state" id="rrVoiceState">● RR AI READY</div><div class="rr-voice-orb-wrap"><div class="rr-voice-orb" id="rrVoiceOrb"></div><div class="rr-voice-caption" id="rrVoiceCaption">Speak naturally with RR AI</div></div><div class="rr-voice-attach-wrap"><button class="rr-voice-attach" id="rrVoiceAttach" type="button" aria-label="Attach photo or file">＋</button><div class="rr-voice-attach-menu" id="rrVoiceAttachMenu"><button type="button" data-voice-pick="photoInput">Photos</button><button type="button" data-voice-pick="cameraInput">Camera</button><button type="button" data-voice-pick="fileInput">Files / PDF</button></div></div><input class="rr-voice-input" id="rrVoiceText" type="text" placeholder="Message RR AI" aria-label="Message RR AI"><button class="rr-voice-mute" id="rrVoiceMute" type="button" aria-label="Interrupt reply and speak" title="Stop reply and speak">♩̸</button><button class="rr-voice-end" id="rrVoiceEnd" type="button" aria-label="End voice chat">×</button></section>
 <script>
 const API_BASE_URL = "https://rr-global-ai-api.onrender.com"; // Public backend URL only. Never put the AI provider API key in this file.
 
@@ -410,29 +419,17 @@ function speakRRReply(text,isCall){
   const synth=window.speechSynthesis;
   synth.cancel();
   const runId=++rrSpeechRunId;
-  const lang=/[\\u0900-\\u097F]/.test(text)?'hi-IN':'en-IN';
+  const cleanText=String(text).replace(/\\s+/g,' ').trim();
+  const lang=/[\\u0900-\\u097F]/.test(cleanText)?'hi-IN':'en-IN';
   const voices=synth.getVoices();
   const voice=voices.find(v=>v.lang.toLowerCase()===lang.toLowerCase())||voices.find(v=>v.lang.toLowerCase().startsWith(lang.slice(0,2)));
-  const parts=String(text).replace(/\\s+/g,' ').match(/[^.!?।]+[.!?।]?/g)||[String(text)];
-  const chunks=[];let buffer='';
-  parts.forEach(part=>{const next=(buffer+' '+part).trim();if(next.length>170&&buffer){chunks.push(buffer.trim());buffer=part.trim();}else buffer=next;});
-  if(buffer.trim())chunks.push(buffer.trim());
-  if(isCall){voiceCallSpeaking=true;if(recognition&&isListening)recognition.stop();setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='RR AI जवाब दे रहा है…';}
-  let index=0;
-  const speakNext=()=>{
-    if(runId!==rrSpeechRunId|| (isCall&&!voiceCallActive))return;
-    if(index>=chunks.length){
-      if(isCall){voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}}
-      return;
-    }
-    const utterance=new SpeechSynthesisUtterance(chunks[index++]);
-    utterance.lang=lang;utterance.rate=0.94;utterance.pitch=1;utterance.volume=1;
-    if(voice)utterance.voice=voice;
-    utterance.onend=()=>{if(runId===rrSpeechRunId)speakNext();};
-    utterance.onerror=()=>{if(runId===rrSpeechRunId){if(isCall){voiceCallSpeaking=false;setVoiceScreenState('● VOICE PLAYBACK ISSUE');} }};
-    synth.speak(utterance);
-  };
-  speakNext();
+  if(isCall){voiceCallSpeaking=true;if(recognition&&isListening)recognition.stop();setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='जवाब सुनें — बीच में बोलने के लिए माइक दबाएँ';}
+  const utterance=new SpeechSynthesisUtterance(cleanText);
+  utterance.lang=lang;utterance.rate=0.97;utterance.pitch=1;utterance.volume=1;
+  if(voice)utterance.voice=voice;
+  utterance.onend=()=>{if(runId!==rrSpeechRunId)return;if(isCall){voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}}};
+  utterance.onerror=()=>{if(runId!==rrSpeechRunId)return;if(isCall){voiceCallSpeaking=false;setVoiceScreenState('● VOICE PLAYBACK ISSUE');}};
+  synth.speak(utterance);
 }
 function setVoiceScreenState(label,listening=false){const state=document.getElementById('rrVoiceState'),caption=document.getElementById('rrVoiceCaption'),orb=document.getElementById('rrVoiceOrb');if(state)state.textContent=label;if(caption)caption.textContent=listening?'Listening… बोलिए':label.replace('● ','');if(orb)orb.classList.toggle('listening',listening);}
 function openRRVoiceScreen(){document.getElementById('rrVoiceScreen').classList.add('open');document.body.style.overflow='hidden';setVoiceScreenState('● RR AI LISTENING',true);}
@@ -529,7 +526,10 @@ document.getElementById('rrVoiceSettings').addEventListener('click',()=>{
   setVoiceScreenState(voiceCallLanguage==='hi-IN'?'● HINDI MODE':'● ENGLISH MODE');
   if(recognition&&isListening)recognition.stop();else startVoiceCallListening();
 });
-document.getElementById('rrVoiceText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const value=e.currentTarget.value.trim();if(value){e.currentTarget.value='';input.value=value;send(value);}}});
+document.getElementById('rrVoiceAttach').addEventListener('click',()=>document.getElementById('rrVoiceAttachMenu').classList.toggle('open'));
+document.querySelectorAll('[data-voice-pick]').forEach(btn=>btn.addEventListener('click',()=>{document.getElementById('rrVoiceAttachMenu').classList.remove('open');document.getElementById(btn.dataset.voicePick).click();}));
+[photoInput,cameraInput,fileInput].forEach(el=>el.addEventListener('change',()=>{if(voiceCallActive&&selectedFiles.length){document.getElementById('rrVoiceCaption').textContent=selectedFiles.length+' file(s) attached — type a question or press Enter to send';}}));
+document.getElementById('rrVoiceText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const value=e.currentTarget.value.trim();if(value||selectedFiles.length){e.currentTarget.value='';input.value=value;send(value);document.getElementById('rrVoiceAttachMenu').classList.remove('open');}}});
 
 form.addEventListener('submit',e=>{e.preventDefault();if(input.value.trim()||selectedFiles.length)send(input.value);else{voiceRepliesEnabled=!voiceRepliesEnabled;voiceModeButton.classList.toggle('active',voiceRepliesEnabled);voiceModeButton.setAttribute('aria-pressed',String(voiceRepliesEnabled));voiceHint.textContent=voiceRepliesEnabled?'Voice replies are on. RR AI will read its answers aloud.':'Voice replies are off.';}});
 input.addEventListener('input',updateActionButton);
