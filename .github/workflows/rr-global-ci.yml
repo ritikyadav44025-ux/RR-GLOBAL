@@ -54,8 +54,8 @@ jobs:
           node <<'NODE'
           const fs = require('node:fs');
           const html = fs.readFileSync('rr-ai-chat.html', 'utf8');
-          const scripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-            .filter(([, attrs, body]) => !/\\bsrc\\s*=/.test(attrs) && body.trim());
+          const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+            .filter(([, attrs, body]) => !/\bsrc\s*=/.test(attrs) && body.trim());
           if (!scripts.length) throw new Error('No inline JavaScript blocks found.');
           scripts.forEach(([, , body], index) => {
             const file = `/tmp/rr-ai-inline-${index + 1}.js`;
