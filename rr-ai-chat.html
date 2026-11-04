@@ -280,6 +280,11 @@ const newConversationButton=document.getElementById('newConversationButton');
 let selectedFiles=[];
 let conversationHistory=[];
 const HISTORY_KEY="rr_ai_current_conversation_v1";
+const SHARED_MEMORY_KEY="rr_ai_shared_context_v1";
+let sharedMemory=[];
+try{const savedMemory=JSON.parse(localStorage.getItem(SHARED_MEMORY_KEY)||"[]");if(Array.isArray(savedMemory))sharedMemory=savedMemory.filter(m=>m&&["user","assistant"].includes(m.role)&&typeof m.content==="string").slice(-24);}catch(_){sharedMemory=[];}
+function rememberAcrossChats(entry){try{if(!entry||!entry.content)return;sharedMemory.push({role:entry.role,content:String(entry.content).slice(0,1800)});sharedMemory=sharedMemory.slice(-24);localStorage.setItem(SHARED_MEMORY_KEY,JSON.stringify(sharedMemory));}catch(_){voiceHint.textContent="Cross-chat memory could not be saved on this device.";}}
+function buildContext(){const current=conversationHistory.slice(-12);const currentKeys=new Set(current.map(m=>m.role+"|"+m.content));const previous=sharedMemory.filter(m=>!currentKeys.has(m.role+"|"+m.content)).slice(-8);return [...previous,...current].slice(-20);}
 try{const saved=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");if(Array.isArray(saved)){conversationHistory=saved.filter(m=>m&&["user","assistant"].includes(m.role)&&typeof m.content==="string").slice(-30);if(conversationHistory.length){messages.innerHTML="";conversationHistory.forEach(m=>addMessage(m.content,m.role));}}}catch(_){conversationHistory=[];}
 function saveConversation(){try{localStorage.setItem(HISTORY_KEY,JSON.stringify(conversationHistory.slice(-30)));refreshSidebarRecents();}catch(_){voiceHint.textContent="Conversation could not be saved on this device. Storage may be unavailable.";}}
 refreshSidebarRecents();
@@ -345,11 +350,12 @@ function addMessage(text,kind){
 async function send(text){
   const value=text.trim() || (selectedFiles.length ? "Please analyze the attached file(s) and explain what they contain." : "");
   if(!value || sendButton.disabled)return;
-  const priorContext=conversationHistory.slice(-12);
+  const priorContext=buildContext();
   const fileNames=selectedFiles.map(file=>file.name);
   const shownMessage=value+(fileNames.length?"\\n📎 "+fileNames.join(", "):"");
   addMessage(shownMessage,'user');
   conversationHistory.push({role:'user',content:shownMessage});
+  rememberAcrossChats({role:'user',content:shownMessage});
   saveConversation();
   input.value='';
   sendButton.disabled=true;
@@ -378,6 +384,7 @@ async function send(text){
     const answer=data.answer || 'The AI returned an empty response. Please try again.';
     addMessage(answer,'assistant');
     conversationHistory.push({role:'assistant',content:answer});
+    rememberAcrossChats({role:'assistant',content:answer});
     saveConversation();
     if(fileNames.length){selectedFiles=[];renderAttachments();}
     if((voiceRepliesEnabled||voiceCallActive) && 'speechSynthesis' in window){
@@ -390,7 +397,7 @@ async function send(text){
       if(preferred)spoken.voice=preferred;
       if(voiceCallActive){
         voiceCallSpeaking=true;
-        spoken.onstart=()=>{setVoiceScreenState('● RR AI SPEAKING');startVoiceCallListening();};
+        spoken.onstart=()=>{setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='मैं जवाब दे रहा हूँ… बीच में बोल सकते हैं';startVoiceCallListening();};
         spoken.onend=()=>{voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted){setVoiceScreenState('● RR AI LISTENING',true);startVoiceCallListening();}};
         spoken.onerror=()=>{voiceCallSpeaking=false;if(voiceCallActive&&!voiceCallMuted)startVoiceCallListening();};
       }
@@ -480,7 +487,7 @@ function renderAttachments(){
   updateActionButton();
 }
 
-voiceModeButton.addEventListener('click',e=>{if(input.value.trim()||selectedFiles.length)return;e.preventDefault();if(voiceCallActive){stopVoiceCall();return;}if(!recognition){voiceHint.textContent='Live voice call is not supported in this browser. Try Chrome.';return;}voiceRepliesEnabled=false;voiceCallActive=true;voiceCallMuted=false;voiceModeButton.classList.add('active','voice-call-active');voiceModeButton.setAttribute('aria-pressed','true');openRRVoiceScreen();voiceHint.textContent='RR AI voice chat is active.';startVoiceCallListening();});
+voiceModeButton.addEventListener('click',e=>{if(input.value.trim()||selectedFiles.length)return;e.preventDefault();if(voiceCallActive){stopVoiceCall();return;}if(!recognition){voiceHint.textContent='Live voice call is not supported in this browser. Try Chrome.';return;}voiceRepliesEnabled=false;voiceCallActive=true;voiceCallMuted=false;voiceModeButton.classList.add('active','voice-call-active');voiceModeButton.setAttribute('aria-pressed','true');openRRVoiceScreen();voiceHint.textContent='RR AI voice chat is active.';document.getElementById('rrVoiceCaption').textContent='मैं आपकी बात सुन रहा हूँ…';startVoiceCallListening();});
 
 document.getElementById('rrVoiceEnd').addEventListener('click',stopVoiceCall);
 document.getElementById('rrVoiceMenu').addEventListener('click',stopVoiceCall);
