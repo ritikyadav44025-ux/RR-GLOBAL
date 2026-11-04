@@ -51,7 +51,7 @@ function saveConversation(){try{localStorage.setItem(HISTORY_KEY,JSON.stringify(
 let voiceRepliesEnabled=false;
 let voiceCallActive=false;
 let voiceCallSpeaking=false;
-function updateActionButton(){const hasText=!!input.value.trim();voiceModeButton.classList.toggle('send-mode',hasText);voiceModeButton.title=hasText?'Send message':'Voice replies';voiceModeButton.setAttribute('aria-label',hasText?'Send message':'Toggle voice replies');}
+function updateActionButton(){const hasText=!!input.value.trim()||selectedFiles.length>0;voiceModeButton.classList.toggle('send-mode',hasText);voiceModeButton.title=hasText?'Send message':'Voice replies';voiceModeButton.setAttribute('aria-label',hasText?'Send message':'Toggle voice replies');}
 
 function addMessage(text,kind){
   const el=document.createElement('div');
@@ -166,10 +166,11 @@ function renderAttachments(){
   });
   attachmentsBox.classList.toggle('has-files',selectedFiles.length>0);
   fileNote.classList.toggle('show',selectedFiles.length>0);
+  updateActionButton();
 }
 
 voiceModeButton.addEventListener('click',e=>{if(input.value.trim())return;e.preventDefault();if(voiceCallActive){stopVoiceCall();return;}if(!recognition){voiceHint.textContent='Live voice call is not supported in this browser. Try Chrome.';return;}voiceRepliesEnabled=false;voiceCallActive=true;voiceModeButton.classList.add('active');voiceModeButton.setAttribute('aria-pressed','true');voiceModeButton.querySelector('.rr-mark').textContent='■';voiceHint.textContent='RR AI voice call is on. बोलना शुरू करें; बंद करने के लिए RR बटन दबाएँ।';startVoiceCallListening();});
-form.addEventListener('submit',e=>{e.preventDefault();if(input.value.trim())send(input.value);else{voiceRepliesEnabled=!voiceRepliesEnabled;voiceModeButton.classList.toggle('active',voiceRepliesEnabled);voiceModeButton.setAttribute('aria-pressed',String(voiceRepliesEnabled));voiceHint.textContent=voiceRepliesEnabled?'Voice replies are on. RR AI will read its answers aloud.':'Voice replies are off.';}});
+form.addEventListener('submit',e=>{e.preventDefault();if(input.value.trim()||selectedFiles.length)send(input.value);else{voiceRepliesEnabled=!voiceRepliesEnabled;voiceModeButton.classList.toggle('active',voiceRepliesEnabled);voiceModeButton.setAttribute('aria-pressed',String(voiceRepliesEnabled));voiceHint.textContent=voiceRepliesEnabled?'Voice replies are on. RR AI will read its answers aloud.':'Voice replies are off.';}});
 input.addEventListener('input',updateActionButton);
 document.querySelectorAll('[data-prompt]').forEach(btn=>btn.addEventListener('click',()=>send(btn.dataset.prompt)));
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(input.value);}});
