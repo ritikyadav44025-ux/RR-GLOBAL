@@ -22,7 +22,7 @@ main{padding:34px 0 24px}.intro{text-align:center;margin:0 auto 22px}.intro h1{m
 <div class="chathead"><div class="orb">AI</div><div><strong>RR AI Assistant</strong><small>Groq backend · Online</small></div><div class="chat-actions"><button type="button" id="newConversationButton">＋ New chat</button></div></div>
 <div class="messages" id="messages" aria-live="polite"><div class="msg assistant">Hello! Welcome to RR AI. I am connected to the secure Groq backend. Ask me a question to get started.</div></div>
 <div class="suggestions"><button type="button" data-prompt="What is RR GLOBAL?">What is RR GLOBAL?</button><button type="button" data-prompt="Give me a study tip.">Study tip</button><button type="button" data-prompt="Help me plan a creative project.">Plan a project</button></div>
-<div class="composer-wrap"><div class="attach-menu" id="attachMenu"><label class="attach-option">🖼️ Photos & videos<input id="photoInput" type="file" accept="image/*,video/*" multiple></label><label class="attach-option">📷 Take a photo<input id="cameraInput" type="file" accept="image/*" capture="environment"></label><label class="attach-option">📄 Browse files<input id="fileInput" type="file" accept=".pdf,.txt,.md,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,image/*" multiple></label></div><div class="attachments" id="attachments"></div><div class="file-note" id="fileNote">Selected files are attached to this draft. File analysis will be enabled in a later backend update.</div><form class="composer" id="chatForm"><button class="plus" id="newChatButton" type="button" aria-label="New chat" title="New chat">+</button><textarea id="prompt" rows="1" placeholder="Reply to RR AI" aria-label="Reply to RR AI"></textarea><button class="mic" id="micButton" type="button" aria-label="Voice input" title="Voice input">🎙</button><button class="voice-mode" id="voiceModeButton" type="submit" aria-label="Voice replies" aria-pressed="false" title="Voice replies"><span class="rr-mark" aria-hidden="true">RR</span><span class="send-arrow" aria-hidden="true">↑</span></button></form></div>
+<div class="composer-wrap"><div class="attach-menu" id="attachMenu"><label class="attach-option">🖼️ Photos & videos<input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><label class="attach-option">📷 Take a photo<input id="cameraInput" type="file" accept="image/jpeg,image/png,image/webp" capture="environment"></label><label class="attach-option">📄 Browse files<input id="fileInput" type="file" accept=".pdf,application/pdf,image/jpeg,image/png,image/webp" multiple></label></div><div class="attachments" id="attachments"></div><div class="file-note" id="fileNote">Images and text-based PDFs can be sent to RR AI for analysis. Up to 3 files, 5 MB each. Avoid uploading private documents.</div><form class="composer" id="chatForm"><button class="plus" id="newChatButton" type="button" aria-label="New chat" title="New chat">+</button><textarea id="prompt" rows="1" placeholder="Reply to RR AI" aria-label="Reply to RR AI"></textarea><button class="mic" id="micButton" type="button" aria-label="Voice input" title="Voice input">🎙</button><button class="voice-mode" id="voiceModeButton" type="submit" aria-label="Voice replies" aria-pressed="false" title="Voice replies"><span class="rr-mark" aria-hidden="true">RR</span><span class="send-arrow" aria-hidden="true">↑</span></button></form></div>
 </section>
 <div class="hint" id="voiceHint">RR AI · Secure Groq connection · Voice input uses your browser speech recognition.</div>
 </main>
@@ -61,11 +61,13 @@ function addMessage(text,kind){
   messages.scrollTop=messages.scrollHeight;
 }
 async function send(text){
-  const value=text.trim();
+  const value=text.trim() || (selectedFiles.length ? "Please analyze the attached file(s) and explain what they contain." : "");
   if(!value || sendButton.disabled)return;
   const priorContext=conversationHistory.slice(-12);
-  addMessage(value,'user');
-  conversationHistory.push({role:'user',content:value});
+  const fileNames=selectedFiles.map(file=>file.name);
+  const shownMessage=value+(fileNames.length?"\\n📎 "+fileNames.join(", "):"");
+  addMessage(shownMessage,'user');
+  conversationHistory.push({role:'user',content:shownMessage});
   saveConversation();
   input.value='';
   sendButton.disabled=true;
@@ -75,17 +77,27 @@ async function send(text){
       addMessage('The RR AI service is not configured yet. Please try again later.','assistant');
       return;
     }
-    const response=await fetch(API_BASE_URL.replace(/\/$/,'')+'/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:value,messages:priorContext})
-    });
+    let response;
+    if(selectedFiles.length){
+      const uploadData=new FormData();
+      uploadData.append('message',value);
+      uploadData.append('messages',JSON.stringify(priorContext));
+      selectedFiles.slice(0,3).forEach(file=>uploadData.append('files',file,file.name));
+      response=await fetch(API_BASE_URL.replace(/\/$/,'')+'/api/analyze',{method:'POST',body:uploadData});
+    }else{
+      response=await fetch(API_BASE_URL.replace(/\/$/,'')+'/api/chat',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({message:value,messages:priorContext})
+      });
+    }
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(data.error || 'The AI service is temporarily unavailable.');
     const answer=data.answer || 'The AI returned an empty response. Please try again.';
     addMessage(answer,'assistant');
     conversationHistory.push({role:'assistant',content:answer});
     saveConversation();
+    if(fileNames.length){selectedFiles=[];renderAttachments();}
     if((voiceRepliesEnabled||voiceCallActive) && 'speechSynthesis' in window){window.speechSynthesis.cancel();const spoken=new SpeechSynthesisUtterance(answer);spoken.lang=/[\\u0900-\\u097F]/.test(answer)?'hi-IN':'en-IN';if(voiceCallActive){voiceCallSpeaking=true;spoken.onend=()=>{voiceCallSpeaking=false;if(voiceCallActive)startVoiceCallListening();};spoken.onerror=()=>{voiceCallSpeaking=false;if(voiceCallActive)startVoiceCallListening();};}window.speechSynthesis.speak(spoken);}
   }catch(error){
     addMessage(error.message || 'Could not reach RR AI. Please try again later.','assistant');
@@ -140,7 +152,7 @@ newChatButton.addEventListener('click',()=>{attachMenu.classList.toggle('open');
 newConversationButton.addEventListener('click',()=>{if(!confirm('Start a new chat? The current conversation will be cleared from this device.'))return;conversationHistory=[];try{localStorage.removeItem(HISTORY_KEY);}catch(_){}messages.innerHTML='';addMessage('Hello! Welcome to RR AI. I am connected to the secure Groq backend. Ask me a question to get started.','assistant');attachMenu.classList.remove('open');input.focus();});
 [photoInput,cameraInput,fileInput].forEach(el=>el.addEventListener('change',()=>{
   const incoming=Array.from(el.files||[]);
-  selectedFiles=[...selectedFiles,...incoming].slice(0,5);
+  selectedFiles=[...selectedFiles,...incoming].slice(0,3);
   renderAttachments();el.value='';attachMenu.classList.remove('open');
 }));
 function renderAttachments(){
