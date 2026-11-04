@@ -493,6 +493,92 @@ header{background:linear-gradient(180deg,rgba(9,17,31,.96),rgba(7,12,22,.88));bo
 #rrVoiceOrb.listening::before{display:none!important;content:none!important}
 #rrVoiceOrb.listening::after{animation:rrRingSpin 3.2s linear infinite!important}
 
+
+/* Match the approved neon-wave voice mockup */
+.rr-voice-screen{
+ background:
+  radial-gradient(ellipse at 50% 43%,rgba(0,104,255,.19),transparent 36%),
+  radial-gradient(ellipse at 50% 56%,rgba(134,28,255,.17),transparent 47%),
+  #020307!important;
+}
+.rr-voice-orb-wrap{
+ top:45%!important;
+ width:min(82vw,430px)!important;height:min(82vw,430px)!important;
+}
+#rrVoiceOrb{
+ position:relative;isolation:isolate;overflow:visible;
+ background:radial-gradient(circle at 50% 48%,#03091a 0%,#050b1d 58%,#02040b 78%)!important;
+ border:0!important;border-radius:50%;
+ box-shadow:0 0 32px rgba(0,130,255,.55),0 0 86px rgba(0,104,255,.35),0 0 130px rgba(143,32,255,.28),inset 0 0 45px rgba(0,115,255,.16)!important;
+}
+#rrVoiceOrb::before{content:none!important;display:none!important}
+#rrVoiceOrb::after{
+ content:""!important;position:absolute;inset:-3px;border-radius:50%;padding:3px;
+ background:conic-gradient(from 205deg,#00eaff 0deg,#087aff 95deg,#762cff 190deg,#ed38ff 265deg,#00cfff 360deg);
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+ -webkit-mask-composite:xor;mask-composite:exclude;
+ filter:drop-shadow(0 0 10px #00aaff) drop-shadow(0 0 24px rgba(159,39,255,.95));
+ animation:rrRingSpin 8s linear infinite;
+}
+.rr-voice-energy{
+ position:absolute;z-index:1;left:1%;right:1%;bottom:5%;height:34%;
+ border-radius:0 0 50% 50%;overflow:hidden;
+ background:
+  radial-gradient(ellipse at 25% 30%,rgba(0,218,255,.5),transparent 55%),
+  radial-gradient(ellipse at 78% 28%,rgba(194,40,255,.48),transparent 58%);
+ filter:blur(3px);opacity:.95;pointer-events:none;
+}
+.rr-voice-energy::before,.rr-voice-energy::after{
+ content:"";position:absolute;left:-12%;width:124%;height:100%;border-radius:50%;
+}
+.rr-voice-energy::before{
+ top:-42%;border:2px solid rgba(0,222,255,.82);
+ background:linear-gradient(180deg,rgba(0,184,255,.3),rgba(0,93,255,.07) 68%,transparent);
+ box-shadow:0 0 18px rgba(0,190,255,.65),inset 0 8px 18px rgba(0,190,255,.22);
+ transform:rotate(7deg);animation:rrWaveDrift 4.2s ease-in-out infinite alternate;
+}
+.rr-voice-energy::after{
+ top:-22%;border-top:2px solid rgba(211,77,255,.85);
+ background:linear-gradient(180deg,rgba(163,44,255,.23),transparent 80%);
+ box-shadow:0 -5px 18px rgba(184,58,255,.4);
+ transform:rotate(-9deg);animation:rrWaveDrift 3.4s ease-in-out infinite alternate-reverse;
+}
+#rrVoiceOrb.listening{
+ animation:rrPurpleListen 1.45s ease-in-out infinite!important;
+}
+#rrVoiceOrb.listening::after{animation:rrRingSpin 3.8s linear infinite}
+#rrVoiceOrb.listening .rr-voice-energy{animation:rrWaveGlow 1.6s ease-in-out infinite alternate}
+.rr-voice-caption{
+ top:calc(100% + 52px)!important;
+ font-size:clamp(23px,5.5vw,30px)!important;
+ line-height:1.28!important;white-space:normal!important;
+ text-align:center;
+}
+.rr-voice-caption:after{
+ content:"मैं आपकी बात सुन रहा हूँ..."!important;
+ display:block;margin-top:10px;
+ font-size:clamp(17px,4vw,21px);font-weight:450;color:#d2d8e8;
+}
+.rr-voice-orb-wrap:after{
+ top:calc(100% + 142px)!important;width:190px!important;height:38px!important;
+ background:repeating-linear-gradient(90deg,#08baff 0 6px,transparent 6px 17px)!important;
+ filter:drop-shadow(0 0 8px #008cff);
+}
+@keyframes rrWaveDrift{
+ from{transform:translateX(-3%) rotate(7deg) scaleY(.9)}
+ to{transform:translateX(3%) rotate(-5deg) scaleY(1.12)}
+}
+@keyframes rrWaveGlow{from{opacity:.65;filter:blur(4px)}to{opacity:1;filter:blur(1px)}}
+@media(max-width:560px){
+ .rr-voice-orb-wrap{top:44%!important;width:min(82vw,430px)!important;height:min(82vw,430px)!important}
+ .rr-voice-caption{top:calc(100% + 44px)!important;font-size:23px!important}
+ .rr-voice-caption:after{font-size:17px}
+ .rr-voice-orb-wrap:after{top:calc(100% + 128px)!important;width:170px!important;height:34px!important}
+}
+@media(max-height:760px){
+ .rr-voice-orb-wrap{top:42%!important;width:min(68vw,350px)!important;height:min(68vw,350px)!important}
+}
+
 </style></head>
 <body>
 <div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><button class="sidebar-search" type="button" id="sidebarSearch">⌕　Search chats</button><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
