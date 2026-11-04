@@ -145,6 +145,30 @@ main{padding:28px 0 24px}
   .composer .mic{width:32px}
   .composer .voice-mode{width:42px;height:42px}
 }
+
+/* RR AI immersive voice screen */
+.rr-voice-screen{position:fixed;inset:0;z-index:1000;display:none;flex-direction:column;justify-content:space-between;background:#050608;color:#f7f8fb;padding:calc(18px + env(safe-area-inset-top)) 22px calc(20px + env(safe-area-inset-bottom));}
+.rr-voice-screen.open{display:flex}
+.rr-voice-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.rr-voice-iconbtn{width:54px;height:54px;border-radius:50%;border:1px solid #383b40;background:#222428;color:white;font-size:23px;display:grid;place-items:center}
+.rr-voice-brand{font-size:14px;font-weight:700;letter-spacing:.12em;color:#e9edf4}
+.rr-voice-brand span{color:#93d9ee}
+.rr-voice-state{position:absolute;top:17px;left:50%;transform:translateX(-50%);white-space:nowrap;border-radius:99px;background:#163d2d;color:#8ef2bc;padding:7px 14px;font-size:11px}
+.rr-voice-orb-wrap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center}
+.rr-voice-orb{width:min(58vw,270px);height:min(58vw,270px);border-radius:50%;background:radial-gradient(circle at 35% 27%,#e5f5fb 0%,#9bb8c9 13%,#3c5268 36%,#111d2c 66%,#050608 100%);box-shadow:0 0 75px rgba(113,192,224,.18),inset -24px -24px 50px rgba(0,0,0,.48);display:grid;place-items:center;animation:rrOrbFloat 5s ease-in-out infinite}
+.rr-voice-orb:before{content:"RR";font-size:clamp(38px,12vw,62px);font-weight:850;letter-spacing:-.1em;font-style:italic;color:#effaff;text-shadow:0 2px 24px #0b1b2b}
+.rr-voice-orb.listening{animation:rrOrbPulse 2s ease-in-out infinite}
+.rr-voice-caption{position:absolute;top:calc(50% + min(31vw,150px));left:0;right:0;text-align:center;color:#c4cbd5;font-size:14px}
+.rr-voice-bottom{display:flex;align-items:center;gap:12px;width:100%;max-width:620px;margin:0 auto}
+.rr-voice-input{flex:1;min-width:0;border:1px solid #55585e;border-radius:40px;background:#292b2f;color:#fff;padding:17px 20px;font-size:15px;outline:none}
+.rr-voice-input::placeholder{color:#b3b5ba}
+.rr-voice-mute,.rr-voice-end{width:62px;height:62px;border:1px solid #4a4c51;border-radius:50%;display:grid;place-items:center;font-size:25px}
+.rr-voice-mute{background:#292b2f;color:#fff}.rr-voice-mute.muted{background:#6c3035;border-color:#a74b55}
+.rr-voice-end{background:#fff;color:#08090b;font-size:30px;border:0}
+@keyframes rrOrbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-8px) scale(1.025)}}
+@keyframes rrOrbPulse{0%,100%{box-shadow:0 0 55px rgba(113,192,224,.17),inset -24px -24px 50px rgba(0,0,0,.48)}50%{box-shadow:0 0 95px rgba(113,192,224,.35),inset -24px -24px 50px rgba(0,0,0,.4)}}
+@media(max-width:560px){.rr-voice-screen{padding-left:18px;padding-right:18px}.rr-voice-iconbtn{width:50px;height:50px}.rr-voice-orb{width:58vw;height:58vw}.rr-voice-bottom{gap:9px}.rr-voice-input{padding:15px 16px;font-size:14px}.rr-voice-mute,.rr-voice-end{width:56px;height:56px}}
+@media(prefers-reduced-motion:reduce){.rr-voice-orb,.rr-voice-orb.listening{animation:none}}
 </style></head>
 <body>
 <div class="sidebar-shade" id="sidebarShade"></div><aside class="rr-sidebar" id="rrSidebar" aria-label="RR AI navigation"><div class="sidebar-top"><div class="sidebar-brand">RR AI</div><button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button></div><button class="sidebar-search" type="button" id="sidebarSearch">⌕　Search chats</button><div class="sidebar-group"><button class="sidebar-item" type="button" id="sidebarChat"><span class="side-icon">▢</span>Chat</button><button class="sidebar-item" type="button" id="sidebarImages"><span class="side-icon">▧</span>Images</button><button class="sidebar-item" type="button" data-upgrade="Coding"><span class="side-icon">‹›</span><span class="side-copy">Coding</span><span class="side-lock">UPGRADE</span></button><button class="sidebar-item" type="button" data-upgrade="Website Development"><span class="side-icon">▣</span><span class="side-copy">Website Development</span><span class="side-lock">UPGRADE</span></button></div><div class="sidebar-label">Pinned</div><div class="sidebar-list"><button class="sidebar-item sidebar-chat" type="button" id="sidebarPinnedChat"><span class="side-icon">▢</span>RR AI Chat</button></div><div class="sidebar-label">Recents</div><div class="sidebar-list" id="sidebarRecents"><button class="sidebar-item sidebar-chat" type="button">New conversation</button></div><div class="sidebar-bottom"><div class="sidebar-avatar">RR</div><div><strong>RR GLOBAL</strong><div style="font-size:11px;color:#aeb3bc">RR AI Assistant</div></div></div></aside><header><div class="wrap nav"><button class="sidebar-hamburger" id="sidebarOpen" type="button" aria-label="Open menu">☰</button><a class="brand" href="index.html"><img src="rr-global-header-logo.png" alt="RR GLOBAL logo"><span>RR GLOBAL</span></a><a class="back" href="rr-ai.html">← RR AI overview</a></div></header>
@@ -159,6 +183,7 @@ main{padding:28px 0 24px}
 </section>
 <div class="hint" id="voiceHint">RR AI · Secure Groq connection · Voice input uses your browser speech recognition.</div>
 </main>
+<section class="rr-voice-screen" id="rrVoiceScreen" aria-label="RR AI voice chat"><div class="rr-voice-top"><button class="rr-voice-iconbtn" id="rrVoiceMenu" type="button" aria-label="Back to chat">☰</button><div class="rr-voice-brand">RR <span>GLOBAL</span></div><button class="rr-voice-iconbtn" id="rrVoiceSettings" type="button" aria-label="Voice settings">☷</button></div><div class="rr-voice-state" id="rrVoiceState">● RR AI READY</div><div class="rr-voice-orb-wrap"><div class="rr-voice-orb" id="rrVoiceOrb"></div><div class="rr-voice-caption" id="rrVoiceCaption">Speak naturally with RR AI</div></div><div class="rr-voice-bottom"><input class="rr-voice-input" id="rrVoiceText" type="text" placeholder="Message RR AI" aria-label="Message RR AI"><button class="rr-voice-mute" id="rrVoiceMute" type="button" aria-label="Mute microphone">♩̸</button><button class="rr-voice-end" id="rrVoiceEnd" type="button" aria-label="End voice chat">×</button></div></section>
 <script>
 const API_BASE_URL = "https://rr-global-ai-api.onrender.com"; // Public backend URL only. Never put the AI provider API key in this file.
 
