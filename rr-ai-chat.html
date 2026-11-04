@@ -437,7 +437,7 @@ function speakRRReply(text,isCall){
   const lang=/[\\u0900-\\u097F]/.test(cleanText)?'hi-IN':'en-IN';
   const voices=synth.getVoices();
   const voice=voices.find(v=>v.lang.toLowerCase()===lang.toLowerCase())||voices.find(v=>v.lang.toLowerCase().startsWith(lang.slice(0,2)));
-  if(isCall){voiceCallSpeaking=true;if(recognition&&isListening)recognition.stop();setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='जवाब सुनें — बीच में बोलने के लिए माइक दबाएँ';}
+  if(isCall){voiceCallSpeaking=true;setVoiceScreenState('● RR AI SPEAKING');document.getElementById('rrVoiceCaption').textContent='जवाब सुनें — बीच में बोलें, RR AI रुककर सुनेगा';if(!isListening&&!voiceCallMuted)startVoiceCallListening();}
   const utterance=new SpeechSynthesisUtterance(cleanText);
   utterance.lang=lang;utterance.rate=0.97;utterance.pitch=1;utterance.volume=1;
   if(voice)utterance.voice=voice;
@@ -466,10 +466,13 @@ function startVoiceCallListening(){if(!voiceCallActive||!recognition||voiceCallM
      let transcript='',finalTranscript='';
      for(let i=event.resultIndex;i<event.results.length;i++){transcript+=event.results[i][0].transcript;if(event.results[i].isFinal)finalTranscript+=event.results[i][0].transcript;}
      if(voiceCallActive){
-       if(transcript){const caption=document.getElementById('rrVoiceCaption');if(caption)caption.textContent=transcript;}
+       if(transcript){
+         const caption=document.getElementById('rrVoiceCaption');if(caption)caption.textContent=transcript;
+         // Barge-in: keep recognition active during TTS and stop playback as soon as the user starts speaking.
+         if(voiceCallSpeaking&&'speechSynthesis' in window){rrSpeechRunId++;window.speechSynthesis.cancel();voiceCallSpeaking=false;setVoiceScreenState('● RR AI LISTENING',true);}
+       }
        if(finalTranscript.trim()&&!voiceCallMuted){
          const interruption=finalTranscript.trim();
-         if(voiceCallSpeaking&&'speechSynthesis' in window){window.speechSynthesis.cancel();voiceCallSpeaking=false;}
          input.value=interruption;
          if(recognition&&isListening)recognition.stop();
          setVoiceScreenState('● RR AI THINKING');
