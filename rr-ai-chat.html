@@ -1052,6 +1052,6 @@ document.querySelectorAll('[data-prompt]').forEach(btn=>btn.addEventListener('cl
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(input.value);}});
 </script>
 <script>
-if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./rr-ai-sw.js").catch(err=>console.warn("RR AI app update setup:",err)));}
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./rr-ai-sw.js",{updateViaCache:"none"}).then(reg=>reg.update()).catch(err=>console.warn("RR AI app update setup:",err)));}
 </script>
 </body></html>
