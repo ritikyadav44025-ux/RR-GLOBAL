@@ -1,0 +1,76 @@
+name: RR GLOBAL Hybrid Checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rr-global-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-site-smoke-check:
+    name: Static site smoke check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate homepage HTML
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          page = Path("index.html")
+          if not page.is_file():
+              raise SystemExit("FAIL: index.html is missing")
+
+          source = page.read_text(encoding="utf-8")
+          if "<!doctype html>" not in source.lower():
+              raise SystemExit("FAIL: index.html is missing an HTML5 doctype")
+
+          class PageCheck(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.title_depth = 0
+                  self.title_text = []
+                  self.has_body = False
+
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() == "title":
+                      self.title_depth += 1
+                  if tag.lower() == "body":
+                      self.has_body = True
+
+              def handle_endtag(self, tag):
+                  if tag.lower() == "title" and self.title_depth:
+                      self.title_depth -= 1
+
+              def handle_data(self, data):
+                  if self.title_depth:
+                      self.title_text.append(data)
+
+          check = PageCheck()
+          check.feed(source)
+          check.close()
+
+          title = " ".join(" ".join(check.title_text).split())
+          if not title:
+              raise SystemExit("FAIL: homepage title is empty")
+          if not check.has_body:
+              raise SystemExit("FAIL: homepage body is missing")
+
+          print(f"PASS: homepage HTML smoke check — {title}")
+          PY
