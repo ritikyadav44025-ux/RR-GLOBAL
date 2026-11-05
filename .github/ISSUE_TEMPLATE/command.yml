@@ -1,0 +1,65 @@
+name: RR GLOBAL Command
+description: Submit a plain-language development command or feature request for RR GLOBAL.
+title: "[COMMAND] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe what you want RR GLOBAL to do. Do not include passwords, API keys, access tokens, private user data, or other secrets.
+  - type: dropdown
+    id: request_type
+    attributes:
+      label: Request type
+      options:
+        - New feature
+        - Bug fix
+        - UI or design change
+        - Performance or reliability
+        - Documentation
+        - Security or privacy review
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Your command
+      description: Write naturally, as if giving an instruction to a developer.
+      placeholder: "Add a feature that..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: What should happen when the work is complete?
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Requirements or constraints
+      description: Mention device support, design preferences, compatibility, or anything that must not change.
+      placeholder: "Keep existing login and data handling unchanged..."
+    validations:
+      required: false
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Known impact
+      description: Choose your best estimate. The maintainer will verify the risk before implementation.
+      options:
+        - Not sure — please inspect first
+        - UI or documentation only
+        - Backend, API, or data handling
+        - Login, permissions, secrets, or deployment
+    validations:
+      required: true
+  - type: checkboxes
+    id: acknowledgement
+    attributes:
+      label: Safety check
+      options:
+        - label: I have not included passwords, API keys, tokens, or private user data.
+          required: true
