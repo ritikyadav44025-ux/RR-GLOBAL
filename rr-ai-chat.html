@@ -728,7 +728,7 @@ function refreshSidebarRecents(){const list=document.getElementById('sidebarRece
 const form=document.getElementById('chatForm');
 const input=document.getElementById('prompt');
 const messages=document.getElementById('messages');
-const sendButton=form.querySelector('button[type="submit"]');
+const sendButton=form.querySelector('#voiceModeButton');
 const micButton=document.getElementById('micButton');
 const voiceHint=document.getElementById('voiceHint');
 const voiceModeButton=document.getElementById('voiceModeButton');
@@ -844,7 +844,7 @@ async function send(text){
   saveConversation();
   input.value='';
   sendButton.disabled=true;
-  sendButton.textContent='…';
+  sendButton.classList.add('sending');
   try{
     if(!API_BASE_URL){
       addMessage('The RR AI service is not configured yet. Please try again later.','assistant');
@@ -879,7 +879,8 @@ async function send(text){
     addMessage(error.message || 'Could not reach RR AI. Please try again later.','assistant');
   }finally{
     sendButton.disabled=false;
-    sendButton.textContent='↑';
+    sendButton.classList.remove('sending');
+    updateActionButton();
     if(!voiceCallActive)input.focus();else{
       input.blur();document.getElementById('rrVoiceText').blur();
       if(voiceCallThinking&&!voiceCallSpeaking){
@@ -999,7 +1000,7 @@ function renderAttachments(){
   updateActionButton();
 }
 
-voiceModeButton.addEventListener('click',()=>{if(input.value.trim()||selectedFiles.length){voiceHint.textContent='पहले मैसेज भेजें या टेक्स्ट हटाएँ, फिर Voice Call शुरू करें।';return;}if(voiceCallActive){stopVoiceCall();return;}if(!recognition){voiceHint.textContent='इस ब्राउज़र में Voice Call सपोर्ट नहीं है। RR AI को Chrome में खोलकर कोशिश करें।';return;}if(!window.isSecureContext){voiceHint.textContent='माइक्रोफ़ोन के लिए सुरक्षित HTTPS कनेक्शन ज़रूरी है।';return;}voiceRepliesEnabled=false;voiceCallActive=true;voiceCallMuted=false;voiceModeButton.classList.add('active','voice-call-active');voiceModeButton.setAttribute('aria-pressed','true');openRRVoiceScreen();voiceHint.textContent='RR AI voice chat is active.';document.getElementById('rrVoiceCaption').textContent='माइक्रोफ़ोन चालू हो रहा है…';startVoiceCallListening();});
+voiceModeButton.addEventListener('click',()=>{if(input.value.trim()||selectedFiles.length){send(input.value);return;}if(voiceCallActive){stopVoiceCall();return;}if(!recognition){voiceHint.textContent='इस ब्राउज़र में Voice Call सपोर्ट नहीं है। RR AI को Chrome में खोलकर कोशिश करें।';return;}if(!window.isSecureContext){voiceHint.textContent='माइक्रोफ़ोन के लिए सुरक्षित HTTPS कनेक्शन ज़रूरी है।';return;}voiceRepliesEnabled=false;voiceCallActive=true;voiceCallMuted=false;voiceModeButton.classList.add('active','voice-call-active');voiceModeButton.setAttribute('aria-pressed','true');openRRVoiceScreen();voiceHint.textContent='RR AI voice chat is active.';document.getElementById('rrVoiceCaption').textContent='माइक्रोफ़ोन चालू हो रहा है…';startVoiceCallListening();});
 
 document.getElementById('rrVoiceEnd').addEventListener('click',stopVoiceCall);
 document.getElementById('rrVoiceMenu').addEventListener('click',stopVoiceCall);
