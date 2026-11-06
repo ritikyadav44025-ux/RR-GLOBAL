@@ -47,6 +47,14 @@ jobs:
       - name: Check backend JavaScript syntax
         run: node --check server/server.js
 
+      - name: Install backend dependencies
+        working-directory: server
+        run: npm install --no-package-lock --ignore-scripts --no-audit --no-fund
+
+      - name: Run backend API smoke tests
+        working-directory: server
+        run: npm test
+
       - name: Scan tracked source for common hard-coded credentials
         shell: bash
         run: |
