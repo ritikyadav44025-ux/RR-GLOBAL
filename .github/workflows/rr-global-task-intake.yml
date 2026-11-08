@@ -1,0 +1,92 @@
+name: RR GLOBAL Task Intake Automation
+
+on:
+  issues:
+    types: [opened, reopened]
+  schedule:
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: rr-global-task-intake
+  cancel-in-progress: false
+
+jobs:
+  triage:
+    name: Queue and classify RR GLOBAL tasks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Classify incoming requests and prepare daily queue report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const labels = [
+              { name: "rr-global-queued", color: "1D76DB", description: "Request received and waiting in the RR GLOBAL task queue" },
+              { name: "rr-global-needs-approval", color: "D93F0B", description: "Owner approval required before implementation or release" },
+              { name: "rr-global-safe-scope", color: "0E8A16", description: "Appears suitable for a low-risk, reversible proposal" }
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              } catch (error) {
+                if (error.status !== 422) throw error;
+              }
+            }
+
+            // Fail closed: only clearly bounded documentation/copy/style tasks are
+            // tentatively low-risk. Everything else requires owner review.
+            const classify = (issue) => {
+              const text = `${issue.title}\n${issue.body || ""}`.toLowerCase();
+              const sensitive = /\b(auth|authentication|authorization|permission|secret|api key|token|password|billing|payment|subscription|database|migration|production|deploy|deployment|delete|personal data|privacy|security|domain|dns|infrastructure|account|login|user data|storage|backend|api|integration|feature|functionality)\b/.test(text);
+              const clearlyLowRisk = /\b(documentation|readme|docs|typo|spelling|copy edit|text correction|wording|color|colour|spacing|font|css polish|visual polish)\b/.test(text);
+              return clearlyLowRisk && !sensitive ? "safe" : "approval";
+            };
+
+            if (context.eventName === "issues") {
+              const issue = context.payload.issue;
+              if (issue.pull_request) return;
+              const kind = classify(issue);
+              const add = ["rr-global-queued", kind === "approval" ? "rr-global-needs-approval" : "rr-global-safe-scope"];
+              await github.rest.issues.addLabels({ owner, repo, issue_number: issue.number, labels: add });
+
+              const note = kind === "approval"
+                ? "This request has been added to the RR GLOBAL queue and flagged for owner approval. Because it may affect security, privacy, data, billing, infrastructure, or production, no implementation or release is authorized until the owner reviews it."
+                : "This request has been added to the RR GLOBAL queue and tentatively marked as a bounded low-risk task (documentation, wording, or visual polish only). It still needs review and a proposed change must go through a pull request. This automation does not write code, merge changes, or deploy the app.";
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: issue.number,
+                body: `**RR GLOBAL Task Queue**\n\n${note}\n\nStatus: **Queued — not started**.`
+              });
+            }
+
+            const openIssues = (await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: "open", per_page: 100
+            })).filter(item => !item.pull_request);
+            const rows = openIssues.map(issue => {
+              const labels = issue.labels.map(label => typeof label === "string" ? label : label.name);
+              const status = labels.includes("rr-global-needs-approval")
+                ? "Needs owner approval"
+                : labels.includes("rr-global-queued") ? "Queued" : "Unclassified";
+              return { number: issue.number, title: issue.title, status, url: issue.html_url };
+            });
+
+            core.summary
+              .addHeading("RR GLOBAL — Daily Task Queue")
+              .addText(`Open requests: ${rows.length}`)
+              .addTable([
+                [{ data: "Issue", header: true }, { data: "Request", header: true }, { data: "Status", header: true }],
+                ...rows.map(row => [
+                  { data: `#${row.number}`, header: false },
+                  { data: row.title, header: false },
+                  { data: row.status, header: false }
+                ])
+              ])
+              .addText("This report organizes requests only. It does not perform AI coding, approve changes, merge pull requests, or deploy production.")
+              .write();
