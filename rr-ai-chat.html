@@ -1050,6 +1050,21 @@ form.addEventListener('submit',e=>{e.preventDefault();if(input.value.trim()||sel
 input.addEventListener('input',updateActionButton);
 document.querySelectorAll('[data-prompt]').forEach(btn=>btn.addEventListener('click',()=>send(btn.dataset.prompt)));
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(input.value);}});
+
+/* Reliable mobile send handling: capture text-button taps before the voice-mode handler. */
+voiceModeButton.addEventListener('click',e=>{
+  if(input.value.trim()||selectedFiles.length){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    send(input.value);
+  }
+},true);
+/* Keep the send icon state in sync across mobile keyboards, paste and autofill. */
+input.addEventListener('keyup',updateActionButton);
+input.addEventListener('change',updateActionButton);
+input.addEventListener('paste',()=>queueMicrotask(updateActionButton));
+updateActionButton();
+
 </script>
 <script>
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./rr-ai-sw.js",{updateViaCache:"none"}).then(reg=>reg.update()).catch(err=>console.warn("RR AI app update setup:",err)));}
