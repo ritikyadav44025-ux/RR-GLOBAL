@@ -1,0 +1,59 @@
+name: RR GLOBAL Android Build
+
+on:
+  push:
+    branches:
+      - feat/android-app-bundle
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-debug:
+    name: Build Android debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install web and Android dependencies
+        run: npm install
+
+      - name: Prepare RR GLOBAL web assets
+        run: |
+          mkdir -p www
+          cp index.html rr-ai.html rr-ai-chat.html rr-ai-manifest.json rr-ai-sw.js rr-global-header-logo.png www/
+
+      - name: Generate native Android project
+        run: npx cap add android
+
+      - name: Sync web assets into Android project
+        run: npx cap sync android
+
+      - name: Build installable debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: rr-global-android-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
