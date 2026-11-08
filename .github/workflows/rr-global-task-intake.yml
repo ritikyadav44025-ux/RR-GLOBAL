@@ -44,7 +44,7 @@ jobs:
             // Fail closed: only clearly bounded documentation/copy/style tasks are
             // tentatively low-risk. Everything else requires owner review.
             const classify = (issue) => {
-              const text = \${issue.title}\n\${issue.body || ""}.toLowerCase();
+              const text = `${issue.title}\n${issue.body || ""}`.toLowerCase();
               const sensitive = /\b(auth|authentication|authorization|permission|secret|api key|token|password|billing|payment|subscription|database|migration|production|deploy|deployment|delete|personal data|privacy|security|domain|dns|infrastructure|account|login|user data|storage|backend|api|integration|feature|functionality)\b/.test(text);
               const clearlyLowRisk = /\b(documentation|readme|docs|typo|spelling|copy edit|text correction|wording|color|colour|spacing|font|css polish|visual polish)\b/.test(text);
               return clearlyLowRisk && !sensitive ? "safe" : "approval";
