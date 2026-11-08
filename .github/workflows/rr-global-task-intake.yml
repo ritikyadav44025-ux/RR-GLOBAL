@@ -66,10 +66,9 @@ jobs:
               });
             }
 
-            const response = await github.rest.issues.listForRepo({
+            const openIssues = (await github.paginate(github.rest.issues.listForRepo, {
               owner, repo, state: "open", per_page: 100
-            });
-            const openIssues = response.data.filter(item => !item.pull_request);
+            })).filter(item => !item.pull_request);
             const rows = openIssues.map(issue => {
               const labels = issue.labels.map(label => typeof label === "string" ? label : label.name);
               const status = labels.includes("rr-global-needs-approval")
