@@ -41,10 +41,13 @@ jobs:
               }
             }
 
+            // Fail closed: only clearly bounded documentation/copy/style tasks are
+            // tentatively low-risk. Everything else requires owner review.
             const classify = (issue) => {
-              const text = `${issue.title}\n${issue.body || ""}`.toLowerCase();
-              const sensitive = /\b(auth|authentication|authorization|permission|secret|api key|token|password|billing|payment|subscription|database|migration|production|deploy|deployment|delete|personal data|privacy|security|domain|dns|infrastructure)\b/.test(text);
-              return sensitive ? "approval" : "safe";
+              const text = \${issue.title}\n\${issue.body || ""}.toLowerCase();
+              const sensitive = /\b(auth|authentication|authorization|permission|secret|api key|token|password|billing|payment|subscription|database|migration|production|deploy|deployment|delete|personal data|privacy|security|domain|dns|infrastructure|account|login|user data|storage|backend|api|integration|feature|functionality)\b/.test(text);
+              const clearlyLowRisk = /\b(documentation|readme|docs|typo|spelling|copy edit|text correction|wording|color|colour|spacing|font|css polish|visual polish)\b/.test(text);
+              return clearlyLowRisk && !sensitive ? "safe" : "approval";
             };
 
             if (context.eventName === "issues") {
@@ -56,7 +59,7 @@ jobs:
 
               const note = kind === "approval"
                 ? "This request has been added to the RR GLOBAL queue and flagged for owner approval. Because it may affect security, privacy, data, billing, infrastructure, or production, no implementation or release is authorized until the owner reviews it."
-                : "This request has been added to the RR GLOBAL queue and marked as a potentially low-risk task. It still needs review and a proposed change must go through a pull request. This automation does not write code, merge changes, or deploy the app.";
+                : "This request has been added to the RR GLOBAL queue and tentatively marked as a bounded low-risk task (documentation, wording, or visual polish only). It still needs review and a proposed change must go through a pull request. This automation does not write code, merge changes, or deploy the app.";
               await github.rest.issues.createComment({
                 owner, repo, issue_number: issue.number,
                 body: `**RR GLOBAL Task Queue**\n\n${note}\n\nStatus: **Queued — not started**.`
