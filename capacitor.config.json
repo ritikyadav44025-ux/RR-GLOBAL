@@ -1,0 +1,8 @@
+{
+  "appId": "com.rrglobal.app",
+  "appName": "RR GLOBAL",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
